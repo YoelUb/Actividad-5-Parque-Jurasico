@@ -1,11 +1,12 @@
 services:
+
   app:
     build: .
-    container_name: parque-jurasico-app
+    container_name: parque_jurasico-app
     command: >
-        sh -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+        sh -c "uvicorn src.parque-jurasico.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src"
     volumes:
-      - ./src/parque-jurasico:/app
+      - ./src:/app/src
     ports:
       - "8000:8000"
     env_file:
@@ -17,7 +18,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    container_name: parque-jurasico-frontend
+    container_name: parque_jurasico-frontend
     command: npm run start
     ports:
       - "3000:3000"
@@ -28,7 +29,7 @@ services:
 
   postgres-db:
     image: postgres:15-alpine
-    container_name: parque-jurasico-bd
+    container_name: parque_jurasico-bd
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -36,7 +37,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - parque-jurasico-bd:/var/lib/postgresql/data
+      - parque_jurasico-bd:/var/lib/postgresql/data
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
@@ -45,4 +46,4 @@ services:
       retries: 5
 
 volumes:
-  parque-jurasico-bd:
+  parque_jurasico-bd:

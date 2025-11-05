@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
-from ...bd import BaseDatos as db
-from ...security import seguridad
-from ...models import dinosaurio as modelos
+from src.parque_jurasico.bd import BaseDatos as db
+from src.parque_jurasico.security import seguridad
+from src.parque_jurasico.models import dinosaurio as modelos
 
 router_auth = APIRouter()
 

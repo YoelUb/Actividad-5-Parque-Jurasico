@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import auth, parque, admin
+from src.parque_jurasico.api.endpoints import auth, parque, admin
 
 router = APIRouter()
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import List
-from ...models import dinosaurio as modelos
-from ...security import seguridad, auditing
-from ...bd import BaseDatos as db
+from src.parque_jurasico.models import dinosaurio as modelos
+from src.parque_jurasico.security import seguridad, auditing
+from src.parque_jurasico.bd import BaseDatos as db
 
 router_admin = APIRouter()
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './AdminDashboard.css';
 
 const API_URL = 'http://localhost:8000/api/admin';
@@ -9,7 +9,7 @@ function AdminDashboard({ token }) {
   const [recintos, setRecintos] = useState([]);
   const [error, setError] = useState('');
 
-  const fetchData = async (endpoint) => {
+  const fetchData = useCallback(async (endpoint) => {
     try {
       const response = await fetch(`${API_URL}/${endpoint}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -22,37 +22,37 @@ function AdminDashboard({ token }) {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }, [token]);
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     const response = await fetchData('logs');
     if (response) {
       const text = await response.text();
       setLogs(text);
     }
-  };
+  }, [fetchData]);
 
-  const fetchDinos = async () => {
+  const fetchDinos = useCallback(async () => {
     const response = await fetchData('dinosaurios');
     if (response) {
       const data = await response.json();
       setDinos(data);
     }
-  };
+  }, [fetchData]);
 
-  const fetchRecintos = async () => {
+  const fetchRecintos = useCallback(async () => {
     const response = await fetchData('recintos');
     if (response) {
       const data = await response.json();
       setRecintos(data);
     }
-  };
+  }, [fetchData]);
 
   useEffect(() => {
     fetchLogs();
     fetchDinos();
     fetchRecintos();
-  }, [token]);
+  }, [fetchLogs, fetchDinos, fetchRecintos]);
 
   return (
     <div className="admin-dashboard">
