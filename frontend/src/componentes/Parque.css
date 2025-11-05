@@ -3,13 +3,13 @@
   width: 90%;
   max-width: 900px;
   margin: 20px auto;
-  border: 5px solid #a3a3a3;
-  background-color: #5d4a3a;
+  border: 5px solid #000;
+  background-color: #3a4a3a;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .grid-cell {
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -29,7 +29,7 @@
 }
 
 .grid-cell .cell-name {
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.7);
   padding: 5px 10px;
   border-radius: 5px;
   z-index: 2;
@@ -37,14 +37,13 @@
   bottom: 10px;
 }
 
-/* Estilos de recintos */
 .grid-cell.terrestre {
   background: #556B2F url('https://i.imgur.com/2Tcx1tY.png');
 }
 .grid-cell.terrestre[data-clickable="true"]:hover {
   transform: scale(1.03);
-  box-shadow: 0 0 20px #90ee90;
-  border-color: #90ee90;
+  box-shadow: 0 0 20px #f7b500;
+  border-color: #f7b500;
 }
 
 .grid-cell.acuatico {
@@ -52,8 +51,8 @@
 }
 .grid-cell.acuatico[data-clickable="true"]:hover {
   transform: scale(1.03);
-  box-shadow: 0 0 20px #00bfff;
-  border-color: #00bfff;
+  box-shadow: 0 0 20px #f7b500;
+  border-color: #f7b500;
 }
 
 .grid-cell.aviario {
@@ -62,8 +61,8 @@
 }
 .grid-cell.aviario[data-clickable="true"]:hover {
   transform: scale(1.03);
-  box-shadow: 0 0 20px #f0f8ff;
-  border-color: #f0f8ff;
+  box-shadow: 0 0 20px #f7b500;
+  border-color: #f7b500;
 }
 
 .grid-cell.edificio {

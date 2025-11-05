@@ -3,6 +3,7 @@ import './App.css';
 import Autenticacion from './componentes/Auth';
 import Parque from './componentes/Parque';
 import ModalDino from './componentes/ModalDino';
+import AdminDashboard from './componentes/AdminDashboard';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -11,7 +12,6 @@ function Aplicacion() {
   const [usuarioActual, setUsuarioActual] = useState(null);
   const [dinoSeleccionado, setDinoSeleccionado] = useState(null);
   const [cargando, setCargando] = useState(true);
-
 
   const manejarCierreSesion = useCallback(() => {
     setToken(null);
@@ -47,7 +47,6 @@ function Aplicacion() {
     localStorage.setItem('jurassic_token', nuevoToken);
   };
 
-
   const manejarClickRecinto = async (idDinosaurio) => {
     if (!idDinosaurio) return;
 
@@ -67,27 +66,40 @@ function Aplicacion() {
     setDinoSeleccionado(null);
   };
 
+  const renderizarContenido = () => {
+    if (cargando) {
+      return <h1>Cargando...</h1>;
+    }
 
+    if (!token) {
+      return <Autenticacion enLoginExitoso={manejarLoginExitoso} />;
+    }
 
-  if (cargando) {
-    return <div className="App-header"><h1>Cargando...</h1></div>;
-  }
+    if (usuarioActual?.role === 'admin') {
+      return (
+        <>
+          <button onClick={manejarCierreSesion} className="logout-button">Salir</button>
+          <AdminDashboard token={token} />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <h1>Parque Jurásico de {usuarioActual?.username}</h1>
+        <button onClick={manejarCierreSesion} className="logout-button">Salir</button>
+        <Parque enClickRecinto={manejarClickRecinto} token={token} />
+        {dinoSeleccionado && (
+          <ModalDino dinosaurio={dinoSeleccionado} alCerrar={cerrarModal} />
+        )}
+      </>
+    );
+  };
 
   return (
     <div className="App">
       <header className="App-header">
-        {!token ? (
-          <Autenticacion enLoginExitoso={manejarLoginExitoso} />
-        ) : (
-          <>
-            <h1>Parque Jurásico de {usuarioActual?.username}</h1>
-            <button onClick={manejarCierreSesion} className="logout-button">Salir</button>
-            <Parque enClickRecinto={manejarClickRecinto} token={token} />
-            {dinoSeleccionado && (
-              <ModalDino dinosaurio={dinoSeleccionado} alCerrar={cerrarModal} />
-            )}
-          </>
-        )}
+        {renderizarContenido()}
       </header>
     </div>
   );

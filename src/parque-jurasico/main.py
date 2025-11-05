@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import router_auth, router_parque
+from api.api import router as api_router
 
 app = FastAPI(title="API de Jurassic Park")
 
@@ -12,8 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router_auth, prefix="/api/auth", tags=["Autenticación"])
-app.include_router(router_parque, prefix="/api/v1/parque", tags=["Parque"])
+app.include_router(api_router, prefix="/api")
 
 @app.get("/")
 def read_root():
