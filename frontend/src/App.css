@@ -13,6 +13,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   perspective: 1200px;
+  overflow: hidden;
 }
 
 .App-header h1 {
@@ -35,6 +36,7 @@
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.2s;
+  z-index: 100;
 }
 
 .logout-button:hover {

@@ -86,7 +86,6 @@ function Aplicacion() {
 
     return (
       <>
-        <h1>Parque Jurásico de {usuarioActual?.username}</h1>
         <button onClick={manejarCierreSesion} className="logout-button">Salir</button>
         <Parque enClickRecinto={manejarClickRecinto} token={token} />
         {dinoSeleccionado && (
