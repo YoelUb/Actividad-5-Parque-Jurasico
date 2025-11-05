@@ -4,9 +4,9 @@ services:
     build: .
     container_name: parque-jurasico-app
     command: >
-        sh -c "uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
+        sh -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
-      - ./src:/app/src
+      - ./parque-jurasico:/app
     ports:
       - "8000:8000"
     env_file:
@@ -19,6 +19,8 @@ services:
     build:
       context: ./frontend
     container_name: parque-jurasico-frontend
+
+    command: npm run start
     ports:
       - "3000:3000"
     volumes:
@@ -46,4 +48,3 @@ services:
 
 volumes:
   parque-jurasico-bd:
-

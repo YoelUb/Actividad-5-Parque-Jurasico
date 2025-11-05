@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Autenticacion.css';
+import './Auth.css';
 
 const API_URL = 'http://localhost:8000/api';
 

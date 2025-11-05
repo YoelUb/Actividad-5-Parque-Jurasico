@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
-import Autenticacion from './componentes/Autenticacion';
-import DisenoParque from './componentes/DisenoParque';
+import Autenticacion from './componentes/Auth';
+import Parque from './componentes/Parque';
 import ModalDino from './componentes/ModalDino';
 
 const API_URL = 'http://localhost:8000/api';
@@ -68,6 +68,7 @@ function Aplicacion() {
   };
 
 
+
   if (cargando) {
     return <div className="App-header"><h1>Cargando...</h1></div>;
   }
@@ -81,7 +82,7 @@ function Aplicacion() {
           <>
             <h1>Parque Jurásico de {usuarioActual?.username}</h1>
             <button onClick={manejarCierreSesion} className="logout-button">Salir</button>
-            <DisenoParque enClickRecinto={manejarClickRecinto} token={token} />
+            <Parque enClickRecinto={manejarClickRecinto} token={token} />
             {dinoSeleccionado && (
               <ModalDino dinosaurio={dinoSeleccionado} alCerrar={cerrarModal} />
             )}

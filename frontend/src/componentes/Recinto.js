@@ -1,5 +1,5 @@
 import React from 'react';
-import './DisenoParque.css';
+import './Parque.css';
 
 function Recinto({ tipo, nombre, idDinosaurio, onRecintoClick }) {
 

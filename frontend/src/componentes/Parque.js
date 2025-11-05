@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Recinto from './Recinto';
-import './DisenoParque.css';
+import './Parque.css';
 
 const API_URL = 'http://localhost:8000/api/v1/parque';
 
