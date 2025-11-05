@@ -69,15 +69,17 @@ DINOSAURIOS_DB: Dict[str, Dinosaurio] = {
 }
 
 RECINTOS_LIST: List[Recinto] = [
-    Recinto(grid_id="a1", nombre="Recinto del T-Rex", tipo="terrestre", id_dinosaurio="dino_001"),
-    Recinto(grid_id="a2", nombre="El Gran Valle", tipo="terrestre", id_dinosaurio="dino_005"),
-    Recinto(grid_id="a3", nombre="Domo Aviario", tipo="aviario", id_dinosaurio="dino_003"),
-    Recinto(grid_id="b1", nombre="Centro de Visitantes", tipo="edificio"),
-    Recinto(grid_id="b2", nombre="Pradera de Triceratops", tipo="terrestre", id_dinosaurio="dino_004"),
-    Recinto(grid_id="b3", nombre="Montaña", tipo="paisaje"),
-    Recinto(grid_id="c1", nombre="Contención de Raptors", tipo="terrestre", id_dinosaurio="dino_006"),
-    Recinto(grid_id="c2", nombre="La Laguna", tipo="acuatico", id_dinosaurio="dino_002"),
-    Recinto(grid_id="c3", nombre="Bosque", tipo="paisaje"),
+    Recinto(grid_id="a1", nombre="Camino de Entrada", tipo="edificio"),
+    Recinto(grid_id="a2", nombre="Recinto del T-Rex", tipo="terrestre", id_dinosaurio="dino_001"),
+    Recinto(grid_id="a3", nombre="Contención de Raptors", tipo="terrestre", id_dinosaurio="dino_006"),
+
+    Recinto(grid_id="b1", nombre="Camino Principal", tipo="edificio"),
+    Recinto(grid_id="b2", nombre="La Laguna", tipo="acuatico", id_dinosaurio="dino_002"),
+    Recinto(grid_id="b3", nombre="Domo Aviario", tipo="aviario", id_dinosaurio="dino_003"),
+
+    Recinto(grid_id="c1", nombre="Bosque", tipo="paisaje"),
+    Recinto(grid_id="c2", nombre="Pradera de Triceratops", tipo="terrestre", id_dinosaurio="dino_004"),
+    Recinto(grid_id="c3", nombre="El Gran Valle", tipo="terrestre", id_dinosaurio="dino_005"),
 ]
 
 DISENO_DEL_PARQUE = DisenoParque(
