@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from src.parque_jurasico.bd import BaseDatos as db
 from src.parque_jurasico.security import seguridad
-from src.parque_jurasico.models import dinosaurio as modelos
+from src.parque_jurasico.modelos import dinosaurio as modelos
 
 router_auth = APIRouter()
 
@@ -29,5 +29,5 @@ async def login_para_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router_auth.get("/me", response_model=modelos.UsuarioAuth)
-async def leer_usuario_actual(usuario_actual: models.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
+async def leer_usuario_actual(usuario_actual: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
     return usuario_actual

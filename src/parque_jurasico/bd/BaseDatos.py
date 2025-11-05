@@ -1,6 +1,6 @@
 from typing import Dict, List
 from passlib.context import CryptContext
-from src.parque_jurasico.models.dinosaurio import Dinosaurio, Recinto, DisenoParque
+from src.parque_jurasico.modelos.dinosaurio import Dinosaurio, Recinto, DisenoParque
 
 contexto_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

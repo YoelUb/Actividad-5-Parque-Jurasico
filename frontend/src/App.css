@@ -6,12 +6,13 @@
 }
 
 .App-header {
-  padding: 20px;
+  padding: 50px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
+  perspective: 1200px;
 }
 
 .App-header h1 {

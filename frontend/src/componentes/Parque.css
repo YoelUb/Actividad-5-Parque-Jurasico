@@ -2,10 +2,18 @@
   gap: 10px;
   width: 90%;
   max-width: 900px;
-  margin: 20px auto;
+  margin: 100px auto;
   border: 5px solid #000;
   background-color: #3a4a3a;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+  transform-style: preserve-3d;
+  transform: rotateX(55deg) rotateZ(45deg);
+  transition: transform 0.5s ease;
+}
+
+.park-grid:hover {
+  transform: rotateX(50deg) rotateZ(45deg);
 }
 
 .grid-cell {
@@ -22,6 +30,9 @@
   color: white;
   text-shadow: 1px 1px 2px black;
   min-height: 150px;
+
+  transform-style: preserve-3d;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 .grid-cell[data-clickable="true"] {
@@ -35,10 +46,15 @@
   z-index: 2;
   position: absolute;
   bottom: 10px;
+
+  transform: rotateZ(-45deg) rotateX(-55deg);
 }
 
+
 .grid-cell.terrestre {
-  background: #556B2F url('https://i.imgur.com/2Tcx1tY.png');
+  background: #556B2F url('https://i.imgur.com/vLYAI1G.jpeg');
+  background-size: cover;
+  background-position: center;
 }
 .grid-cell.terrestre[data-clickable="true"]:hover {
   transform: scale(1.03);
@@ -47,7 +63,9 @@
 }
 
 .grid-cell.acuatico {
-  background: #0077be url('https://i.imgur.com/7k0bM4c.png');
+  background: #0077be url('https://i.imgur.com/N5n2UaU.jpeg');
+  background-size: cover;
+  background-position: center;
 }
 .grid-cell.acuatico[data-clickable="true"]:hover {
   transform: scale(1.03);
@@ -56,8 +74,9 @@
 }
 
 .grid-cell.aviario {
-  background: #87CEEB url('https://i.imgur.com/r6mG1P9.png');
-  background-size: 50px 50px;
+  background: #87CEEB url('https://i.imgur.com/39kPsox.jpeg');
+  background-size: cover;
+  background-position: center;
 }
 .grid-cell.aviario[data-clickable="true"]:hover {
   transform: scale(1.03);

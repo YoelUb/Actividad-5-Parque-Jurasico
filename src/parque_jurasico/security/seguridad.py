@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from typing import Optional, Dict, Any
-from src.parque_jurasico.models.dinosaurio import Usuario, UsuarioAuth
+from src.parque_jurasico.modelos.dinosaurio import Usuario, UsuarioAuth
 from src.parque_jurasico.bd.BaseDatos import usuarios_falsos_db, contexto_pwd
 
 CLAVE_SECRETA = os.getenv("SECRET_KEY", "una_clave_secreta_por_defecto_muy_segura")
