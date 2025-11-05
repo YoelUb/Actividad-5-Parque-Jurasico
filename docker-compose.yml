@@ -3,9 +3,8 @@ services:
   app:
     build: .
     container_name: parque-jurasico-app
-    command:
-      sh -c "python -m src.create_admin &&
-      uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: >
+        sh -c "uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
       - ./src:/app/src
     ports:
