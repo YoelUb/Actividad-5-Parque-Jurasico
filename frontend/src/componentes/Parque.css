@@ -1,0 +1,76 @@
+.park-grid {
+  gap: 10px;
+  width: 90%;
+  max-width: 900px;
+  margin: 20px auto;
+  border: 5px solid #a3a3a3;
+  background-color: #5d4a3a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.grid-cell {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+  min-height: 150px;
+}
+
+.grid-cell[data-clickable="true"] {
+  cursor: pointer;
+}
+
+.grid-cell .cell-name {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 5px 10px;
+  border-radius: 5px;
+  z-index: 2;
+  position: absolute;
+  bottom: 10px;
+}
+
+/* Estilos de recintos */
+.grid-cell.terrestre {
+  background: #556B2F url('https://i.imgur.com/2Tcx1tY.png');
+}
+.grid-cell.terrestre[data-clickable="true"]:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px #90ee90;
+  border-color: #90ee90;
+}
+
+.grid-cell.acuatico {
+  background: #0077be url('https://i.imgur.com/7k0bM4c.png');
+}
+.grid-cell.acuatico[data-clickable="true"]:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px #00bfff;
+  border-color: #00bfff;
+}
+
+.grid-cell.aviario {
+  background: #87CEEB url('https://i.imgur.com/r6mG1P9.png');
+  background-size: 50px 50px;
+}
+.grid-cell.aviario[data-clickable="true"]:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px #f0f8ff;
+  border-color: #f0f8ff;
+}
+
+.grid-cell.edificio {
+  background-color: #b0c4de;
+  color: #333;
+  text-shadow: none;
+}
+.grid-cell.paisaje {
+  background-color: #8B4513;
+}

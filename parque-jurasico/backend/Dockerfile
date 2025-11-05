@@ -7,6 +7,6 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY parque-jurasico/backend/app .
+COPY app .
 
 EXPOSE 8000
