@@ -1,67 +1,75 @@
-import React from 'react';
-import { MapContainer, ImageOverlay, Marker, Popup } from 'react-leaflet';
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import './Parque.css';
 
-import mapaDelParque from '../assets/mapa_parque.png';
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
+const bounds = [[0, 0], [820, 660]];
+const mapMinZoom = 0;
+const mapMaxZoom = 2;
+const center = [410, 330];
 
-const bounds = [[0, 0], [600, 600]];
+function MapRefresher({ bounds }) {
+  const map = useMap();
 
-function convertirGridACoords(gridId) {
-  const fila = gridId.charCodeAt(0) - 'a'.charCodeAt(0);
-  const col = parseInt(gridId.charAt(1), 10) - 1;
+  useEffect(() => {
 
-  const x = col * 200 + 100;
-  const y = (2 - fila) * 200 + 100;
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+      map.fitBounds(bounds);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [map, bounds]);
 
-  return [y, x];
+  return null;
 }
 
-function MapaParque({ diseno, enClickRecinto }) {
-  return (
-    <MapContainer
-      crs={L.CRS.Simple}
-      bounds={bounds}
-      minZoom={-1}
-      className="mapa-container"
-    >
-      <ImageOverlay
-        url={mapaDelParque}
-        bounds={bounds}
-      />
 
-      {diseno.recintos.map(recinto => {
-        if (!recinto.id_dinosaurio) {
-          return null;
-        }
+const MapaParque = ({ diseno, enClickRecinto }) => {
 
-        const posicion = convertirGridACoords(recinto.grid_id);
+    const dinosaurios = diseno?.dinosaurios || [];
 
-        return (
-          <Marker
-            key={recinto.grid_id}
-            position={posicion}
-            eventHandlers={{
-              click: () => {
-                enClickRecinto(recinto.id_dinosaurio);
-              },
-            }}
-          >
-            <Popup>
-              <strong>{recinto.nombre}</strong>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
-  );
-}
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+        iconUrl: require('leaflet/dist/images/marker-icon.png'),
+        shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+    });
+
+    return (
+        <MapContainer
+            className="mapa-container"
+            crs={L.CRS.Simple}
+            bounds={bounds}
+            minZoom={mapMinZoom}
+            maxZoom={mapMaxZoom}
+            center={center}
+            zoomControl={false}
+        >
+            <MapRefresher bounds={bounds} />
+
+            <TileLayer
+                url="/map-tiles/{z}/{x}/{y}.png"
+                attribution='&copy; Jurassic World'
+                noWrap={true}
+            />
+
+            {dinosaurios.map(dino => (
+                <Marker
+                    key={dino.id}
+                    position={[dino.posicion_y, dino.posicion_x]}
+                    eventHandlers={{
+                        click: () => enClickRecinto(dino.id),
+                    }}
+                >
+                    <Popup>
+                        <b>{dino.nombre}</b><br />
+                        Especie: {dino.especie}
+                    </Popup>
+                </Marker>
+            ))}
+        </MapContainer>
+    );
+};
 
 export default MapaParque;
