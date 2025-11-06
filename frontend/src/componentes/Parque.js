@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Recinto from './Recinto';
 import './Parque.css';
+import MapaParque from './MapaParque';
 
 const API_URL = 'http://localhost:8000/api/v1/parque';
 
@@ -31,24 +31,11 @@ function DisenoParque({ enClickRecinto, token }) {
     return <div>Cargando parque...</div>;
   }
 
-  const estiloGrid = {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${diseno.tamano_grid[1]}, 1fr)`,
-    gridTemplateRows: `repeat(${diseno.tamano_grid[0]}, 200px)`,
-  };
-
   return (
-    <div className="park-grid" style={estiloGrid}>
-      {diseno.recintos.map(recinto => (
-        <Recinto
-          key={recinto.grid_id}
-          tipo={recinto.tipo}
-          nombre={recinto.nombre}
-          idDinosaurio={recinto.id_dinosaurio}
-          onRecintoClick={enClickRecinto}
-        />
-      ))}
-    </div>
+    <MapaParque
+      diseno={diseno}
+      enClickRecinto={enClickRecinto}
+    />
   );
 }
 
