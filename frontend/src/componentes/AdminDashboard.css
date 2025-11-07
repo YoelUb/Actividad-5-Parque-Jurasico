@@ -5,6 +5,7 @@
     background-color: #f9fafb;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    box-sizing: border-box;
 }
 
 .admin-dashboard h2 {
@@ -30,6 +31,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     margin-bottom: 2rem;
+    box-sizing: border-box;
 }
 
 .dashboard-section-flex {
