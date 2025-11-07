@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './App.css';
-import Autenticacion from './componentes/Auth';
-import Parque from './componentes/Parque';
-import ModalDino from './componentes/ModalDino';
 import AdminDashboard from './componentes/AdminDashboard';
+import Autenticacion from './componentes/Auth';
+import './App.css';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -28,9 +26,9 @@ function Aplicacion() {
     const obtenerUsuario = async () => {
       try {
         const respuesta = await fetch(`${API_URL}/auth/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
-        if (!respuesta.ok) throw new Error("Token inválido");
+        if (!respuesta.ok) throw new Error('Token inválido');
         const datosUsuario = await respuesta.json();
         setUsuarioActual(datosUsuario);
       } catch (err) {
@@ -39,6 +37,7 @@ function Aplicacion() {
         setCargando(false);
       }
     };
+
     obtenerUsuario();
   }, [token, manejarCierreSesion]);
 
@@ -52,7 +51,7 @@ function Aplicacion() {
 
     try {
       const respuesta = await fetch(`${API_URL}/v1/parque/dinosaurio/${idDinosaurio}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!respuesta.ok) throw new Error('Dinosaurio no encontrado');
       const datos = await respuesta.json();
@@ -78,7 +77,9 @@ function Aplicacion() {
     if (usuarioActual?.role === 'admin') {
       return (
         <>
-          <button onClick={manejarCierreSesion} className="logout-button">Salir</button>
+          <button onClick={manejarCierreSesion} className="logout-button">
+            Salir
+          </button>
           <AdminDashboard token={token} />
         </>
       );
@@ -86,7 +87,9 @@ function Aplicacion() {
 
     return (
       <>
-        <button onClick={manejarCierreSesion} className="logout-button">Salir</button>
+        <button onClick={manejarCierreSesion} className="logout-button">
+          Salir
+        </button>
         <Parque enClickRecinto={manejarClickRecinto} token={token} />
         {dinoSeleccionado && (
           <ModalDino dinosaurio={dinoSeleccionado} alCerrar={cerrarModal} />
@@ -97,9 +100,7 @@ function Aplicacion() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        {renderizarContenido()}
-      </header>
+      <header className="App-header">{renderizarContenido()}</header>
     </div>
   );
 }
