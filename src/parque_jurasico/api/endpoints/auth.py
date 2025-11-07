@@ -6,10 +6,10 @@ from src.parque_jurasico.bd import BaseDatos as db
 from src.parque_jurasico.security import seguridad
 from src.parque_jurasico.modelos import dinosaurio as modelos
 
-router_auth = APIRouter()
+router = APIRouter()
 
 
-@router_auth.post("/token", response_model=modelos.Token)
+@router.post("/token", response_model=modelos.Token)
 async def login_para_token(form_data: OAuth2PasswordRequestForm = Depends()):
     usuario = db.usuarios_falsos_db.get(form_data.username)
     if not usuario or not seguridad.verificar_contrasena(form_data.password, usuario["hashed_password"]):
@@ -28,6 +28,6 @@ async def login_para_token(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router_auth.get("/me", response_model=modelos.UsuarioAuth)
+@router.get("/me", response_model=modelos.UsuarioAuth)
 async def leer_usuario_actual(usuario_actual: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
     return usuario_actual

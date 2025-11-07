@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.parque_jurasico.api.api import router as api_router
+from src.parque_jurasico.api.api import api_router
 
 app = FastAPI(title="API de Jurassic Park")
 

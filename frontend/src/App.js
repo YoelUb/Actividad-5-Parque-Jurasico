@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminDashboard from './componentes/AdminDashboard';
 import Autenticacion from './componentes/Auth';
+import MapaJurassic from './componentes/MapaJurassic';
 import './App.css';
 
 const API_URL = 'http://localhost:8000/api';
@@ -46,6 +47,7 @@ function Aplicacion() {
     localStorage.setItem('jurassic_token', nuevoToken);
   };
 
+
   const manejarClickRecinto = async (idDinosaurio) => {
     if (!idDinosaurio) return;
 
@@ -60,6 +62,7 @@ function Aplicacion() {
       console.error(err);
     }
   };
+
 
   const cerrarModal = () => {
     setDinoSeleccionado(null);
@@ -90,10 +93,7 @@ function Aplicacion() {
         <button onClick={manejarCierreSesion} className="logout-button">
           Salir
         </button>
-        <Parque enClickRecinto={manejarClickRecinto} token={token} />
-        {dinoSeleccionado && (
-          <ModalDino dinosaurio={dinoSeleccionado} alCerrar={cerrarModal} />
-        )}
+        <MapaJurassic />
       </>
     );
   };
