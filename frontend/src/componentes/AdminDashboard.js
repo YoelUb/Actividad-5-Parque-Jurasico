@@ -1,91 +1,148 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './AdminDashboard.css';
+import MapaJurassic from './MapaJurassic';
 
-const API_URL = 'http://localhost:8000/api/admin';
+const AdminDashboard = () => {
+    const [users, setUsers] = useState([]);
+    const [dinosaurios, setDinosaurios] = useState([]); // Mantenemos esto para el formulario
+    const [newDino, setNewDino] = useState({ nombre: '', especie: '', dieta: '', latitud: 0, longitud: 0 });
+    const [error, setError] = useState('');
 
-function AdminDashboard({ token }) {
-  const [logs, setLogs] = useState('');
-  const [dinos, setDinos] = useState([]);
-  const [recintos, setRecintos] = useState([]);
-  const [error, setError] = useState('');
+    const token = localStorage.getItem('token');
 
-  const fetchData = useCallback(async (endpoint) => {
-    try {
-      const response = await fetch(`${API_URL}/${endpoint}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.detail || 'Error al cargar datos');
-      }
-      return response;
-    } catch (err) {
-      setError(err.message);
-    }
-  }, [token]);
+    // Headers de autenticación
+    const authHeaders = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
 
-  const fetchLogs = useCallback(async () => {
-    const response = await fetchData('logs');
-    if (response) {
-      const text = await response.text();
-      setLogs(text);
-    }
-  }, [fetchData]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch Users
+                const usersResponse = await axios.get('/api/admin/users', authHeaders);
+                setUsers(usersResponse.data);
 
-  const fetchDinos = useCallback(async () => {
-    const response = await fetchData('dinosaurios');
-    if (response) {
-      const data = await response.json();
-      setDinos(data);
-    }
-  }, [fetchData]);
+                // Fetch Dinos (para la lista y el formulario)
+                const dinosResponse = await axios.get('/api/admin/dinosaurio', authHeaders);
+                setDinosaurios(dinosResponse.data);
 
-  const fetchRecintos = useCallback(async () => {
-    const response = await fetchData('recintos');
-    if (response) {
-      const data = await response.json();
-      setRecintos(data);
-    }
-  }, [fetchData]);
+            } catch (err) {
+                setError('Error al cargar los datos. ¿Tu token sigue siendo válido?');
+                console.error(err);
+            }
+        };
 
-  useEffect(() => {
-    fetchLogs();
-    fetchDinos();
-    fetchRecintos();
-  }, [fetchLogs, fetchDinos, fetchRecintos]);
+        if (token) {
+            fetchData();
+        }
+    }, [token]);
 
-  return (
-    <div className="admin-dashboard">
-      <h1>Panel de Administrador</h1>
-      {error && <p className="error">{error}</p>}
 
-      <div className="admin-section">
-        <h2>Dinosaurios Creados ({dinos.length})</h2>
-        <ul>
-          {dinos.map(dino => (
-            <li key={dino.id}><strong>{dino.nombre}</strong> ({dino.tipo_recinto}) - {dino.dieta}</li>
-          ))}
-        </ul>
-      </div>
+    const handleDinoSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('/api/admin/dinosaurio', newDino, authHeaders);
+            setDinosaurios([...dinosaurios, response.data]); // Añadir el nuevo dino a la lista
+            setNewDino({ nombre: '', especie: '', dieta: '', latitud: 0, longitud: 0 }); // Resetear form
+            setError('');
+        } catch (err) {
+            setError('Error al crear el dinosaurio.');
+            console.error(err);
+        }
+    };
 
-      <div className="admin-section">
-        <h2>Recintos del Parque ({recintos.length})</h2>
-        <ul>
-          {recintos.map(r => (
-            <li key={r.grid_id}><strong>{r.nombre}</strong> ({r.tipo}) - {r.id_dinosaurio || 'Vacío'}</li>
-          ))}
-        </ul>
-      </div>
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewDino({ ...newDino, [name]: value });
+    };
 
-      <div className="admin-section">
-        <h2>Logs de Auditoría</h2>
-        <button onClick={fetchLogs} className="refresh-button">Refrescar Logs</button>
-        <pre className="logs-container">
-          {logs || 'Cargando logs...'}
-        </pre>
-      </div>
-    </div>
-  );
-}
+
+    return (
+        <div className="admin-dashboard">
+            <h2>Panel de Administración del Parque</h2>
+            {error && <p className="error-message">{error}</p>}
+
+            <div className="dashboard-section">
+                <h3>Mapa de Recintos (Genially)</h3>
+                <MapaJurassic />
+            </div>
+
+
+            <div className="dashboard-section-flex">
+                <div className="dashboard-section">
+                    <h3>Añadir Nuevo Dinosaurio</h3>
+                    <form onSubmit={handleDinoSubmit} className="dino-form">
+                        <input
+                            type="text"
+                            name="nombre"
+                            value={newDino.nombre}
+                            onChange={handleInputChange}
+                            placeholder="Nombre (Ej: Rexy)"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="especie"
+                            value={newDino.especie}
+                            onChange={handleInputChange}
+                            placeholder="Especie (Ej: T-Rex)"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="dieta"
+                            value={newDino.dieta}
+                            onChange={handleInputChange}
+                            placeholder="Dieta (Ej: Carnívoro)"
+                            required
+                        />
+                        <input
+                            type="number"
+                            name="latitud"
+                            value={newDino.latitud}
+                            onChange={handleInputChange}
+                            placeholder="Latitud (Ej: 10.45)"
+                            step="any"
+                            required
+                        />
+                        <input
+                            type="number"
+                            name="longitud"
+                            value={newDino.longitud}
+                            onChange={handleInputChange}
+                            placeholder="Longitud (Ej: -84.12)"
+                            step="any"
+                            required
+                        />
+                        <button type="submit">Añadir Dinosaurio</button>
+                    </form>
+                </div>
+
+                <div className="dashboard-section">
+                    <h3>Dinosaurios en la Base de Datos</h3>
+                    <ul className="data-list">
+                        {dinosaurios.map(dino => (
+                            <li key={dino.id}>
+                                {dino.nombre} ({dino.especie}) - Coords: [{dino.latitud}, {dino.longitud}]
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+
+            <div className="dashboard-section">
+                <h3>Usuarios Registrados</h3>
+                <ul className="data-list">
+                    {users.map(user => (
+                        <li key={user.id}>
+                            {user.username} - {user.is_admin ? <strong>(Admin)</strong> : '(Usuario)'}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
+};
 
 export default AdminDashboard;

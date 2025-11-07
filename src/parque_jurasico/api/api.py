@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-from src.parque_jurasico.api.endpoints import auth, parque, admin
+from src.parque_jurasico.api.endpoints import admin, auth, parque, info
 
-router = APIRouter()
+api_router = APIRouter()
 
-router.include_router(auth.router_auth, prefix="/auth", tags=["Autenticación"])
-router.include_router(parque.router_parque, prefix="/v1/parque", tags=["Parque"])
-router.include_router(admin.router_admin, prefix="/admin", tags=["Admin"])
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_router.include_router(parque.router, prefix="/parque", tags=["parque"])
+api_router.include_router(info.router, prefix="/info", tags=["info"])
