@@ -21,7 +21,7 @@ const MapaImage = ({width, height}) => {
     return <Image image={image} width={width} height={height}/>;
 };
 
-const MapPoint = ({point, scaleX, scaleY, onHover}) => {
+const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const scaleAvg = (scaleX + scaleY) / 2;
@@ -58,13 +58,17 @@ const MapPoint = ({point, scaleX, scaleY, onHover}) => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={() => {
-                alert(`Has hecho clic en: ${point.name}`);
+                if (point.name === "Puerta" && onSalirClick) {
+                    onSalirClick();
+                } else {
+                    alert(`Has hecho clic en: ${point.name}`);
+                }
             }}
         />
     );
 };
 
-const MapaJurassic = () => {
+const MapaJurassic = ({ onSalirClick }) => {
     const wrapperRef = useRef(null);
     const [size, setSize] = useState({width: ORIGINAL_WIDTH, height: ORIGINAL_HEIGHT});
     const [tooltip, setTooltip] = useState(null);
@@ -75,7 +79,7 @@ const MapaJurassic = () => {
                 const containerWidth = wrapperRef.current.offsetWidth;
                 const containerHeight = Math.min(
                     containerWidth * (ORIGINAL_HEIGHT / ORIGINAL_WIDTH),
-                    window.innerHeight * 0.9 // Limitar altura al 90% de la ventana
+                    window.innerHeight * 0.9
                 );
 
                 setSize({
@@ -136,6 +140,7 @@ const MapaJurassic = () => {
                             scaleX={scaleX}
                             scaleY={scaleY}
                             onHover={handlePointHover}
+                            onSalirClick={onSalirClick}
                         />
                     ))}
 

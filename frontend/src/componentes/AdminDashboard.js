@@ -3,15 +3,14 @@ import axios from 'axios';
 import './AdminDashboard.css';
 import MapaJurassic from './MapaJurassic';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ onSalirClick }) => {
     const [users, setUsers] = useState([]);
-    const [dinosaurios, setDinosaurios] = useState([]); // Mantenemos esto para el formulario
+    const [dinosaurios, setDinosaurios] = useState([]);
     const [newDino, setNewDino] = useState({ nombre: '', especie: '', dieta: '', latitud: 0, longitud: 0 });
     const [error, setError] = useState('');
 
     const token = localStorage.getItem('token');
 
-    // Headers de autenticación
     const authHeaders = {
         headers: { Authorization: `Bearer ${token}` }
     };
@@ -19,11 +18,9 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch Users
                 const usersResponse = await axios.get('/api/admin/users', authHeaders);
                 setUsers(usersResponse.data);
 
-                // Fetch Dinos (para la lista y el formulario)
                 const dinosResponse = await axios.get('/api/admin/dinosaurio', authHeaders);
                 setDinosaurios(dinosResponse.data);
 
@@ -43,8 +40,8 @@ const AdminDashboard = () => {
         e.preventDefault();
         try {
             const response = await axios.post('/api/admin/dinosaurio', newDino, authHeaders);
-            setDinosaurios([...dinosaurios, response.data]); // Añadir el nuevo dino a la lista
-            setNewDino({ nombre: '', especie: '', dieta: '', latitud: 0, longitud: 0 }); // Resetear form
+            setDinosaurios([...dinosaurios, response.data]);
+            setNewDino({ nombre: '', especie: '', dieta: '', latitud: 0, longitud: 0 });
             setError('');
         } catch (err) {
             setError('Error al crear el dinosaurio.');
@@ -65,7 +62,7 @@ const AdminDashboard = () => {
 
             <div className="dashboard-section">
                 <h3>Mapa de Recintos (Genially)</h3>
-                <MapaJurassic />
+                <MapaJurassic onSalirClick={onSalirClick} />
             </div>
 
 
