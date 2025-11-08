@@ -14,7 +14,6 @@ const locations = [
     {"name": "Recinto Acuario", "x": 862, "y": 159, "r": 8},
     {"name": "Guardas", "x": 484, "y": 336, "r": 8},
     {"name": "Helipuerto", "x": 575, "y": 175, "r": 8},
-
 ];
 
 const MapaImage = ({width, height}) => {
@@ -73,11 +72,15 @@ const MapaJurassic = () => {
     useEffect(() => {
         const updateSize = () => {
             if (wrapperRef.current) {
-                const newWidth = wrapperRef.current.offsetWidth;
+                const containerWidth = wrapperRef.current.offsetWidth;
+                const containerHeight = Math.min(
+                    containerWidth * (ORIGINAL_HEIGHT / ORIGINAL_WIDTH),
+                    window.innerHeight * 0.9 // Limitar altura al 90% de la ventana
+                );
 
                 setSize({
-                    width: newWidth,
-                    height: newWidth * (ORIGINAL_HEIGHT / ORIGINAL_WIDTH)
+                    width: containerWidth,
+                    height: containerHeight
                 });
             }
         };
@@ -99,10 +102,29 @@ const MapaJurassic = () => {
     const scaleY = size.height / ORIGINAL_HEIGHT;
 
     return (
-        <div ref={wrapperRef} className="map-wrapper">
+        <div
+            ref={wrapperRef}
+            className="map-wrapper"
+            style={{
+                width: '100%',
+                height: 'auto',
+                maxHeight: '90vh',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#1a1a1a',
+                padding: '20px 0',
+                boxSizing: 'border-box'
+            }}
+        >
             <Stage
                 width={size.width}
                 height={size.height}
+                style={{
+                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+                    borderRadius: '8px',
+                    overflow: 'hidden'
+                }}
             >
                 <Layer>
                     <MapaImage width={size.width} height={size.height}/>
