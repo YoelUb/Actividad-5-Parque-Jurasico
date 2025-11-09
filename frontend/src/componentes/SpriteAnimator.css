@@ -1,0 +1,23 @@
+.sprite-animator {
+    width: var(--frame-width);
+    height: var(--frame-height);
+    background-image: var(--sprite-sheet);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+
+
+    animation: run-sprite 0.8s steps(var(--frame-count)) infinite;
+
+    image-rendering: pixelated;
+
+    transform: scale(3);
+}
+
+@keyframes run-sprite {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: calc(var(--sprite-sheet-width) * -1) 0;
+    }
+}

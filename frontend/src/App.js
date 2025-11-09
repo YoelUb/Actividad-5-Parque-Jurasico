@@ -1,8 +1,10 @@
-import React, {useState, useEffect, useCallback} from 'react';
+// frontend/src/App.js
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminDashboard from './componentes/AdminDashboard';
 import Autenticacion from './componentes/Auth';
 import MapaJurassic from './componentes/MapaJurassic';
 import ModalConfirmacion from './componentes/ModalConfirmacion';
+import DinoModal from './componentes/DinoModal';
 import './App.css';
 
 const API_URL = 'http://localhost:8000/api';
@@ -10,11 +12,11 @@ const API_URL = 'http://localhost:8000/api';
 function Aplicacion() {
     const [token, setToken] = useState(localStorage.getItem('jurassic_token'));
     const [usuarioActual, setUsuarioActual] = useState(null);
-    const [dinoSeleccionado, setDinoSeleccionado] = useState(null);
     const [cargando, setCargando] = useState(true);
-
-    // 2. Añadir estado para el modal
     const [modalAbierto, setModalAbierto] = useState(false);
+
+    const [dinoSeleccionado, setDinoSeleccionado] = useState(null);
+    const [dinos, setDinos] = useState({});
 
     const manejarCierreSesion = useCallback(() => {
         setToken(null);
@@ -33,15 +35,28 @@ function Aplicacion() {
             return;
         }
 
-        const obtenerUsuario = async () => {
+        const obtenerDatosIniciales = async () => {
             try {
-                const respuesta = await fetch(`${API_URL}/auth/me`, {
-                    headers: {Authorization: `Bearer ${token}`},
+                // 1. Obtener usuario
+                const userRes = await fetch(`${API_URL}/auth/me`, {
+                    headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!respuesta.ok) throw new Error('Token inválido');
-                const datosUsuario = await respuesta.json();
+                if (!userRes.ok) throw new Error('Token inválido');
+                const datosUsuario = await userRes.json();
                 setUsuarioActual(datosUsuario);
+
+                const dinosRes = await fetch(`${API_URL}/parque/dinosaurios`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const allDinos = await dinosRes.json();
+                const dinosById = allDinos.reduce((acc, dino) => {
+                    acc[dino.id] = dino;
+                    return acc;
+                }, {});
+                setDinos(dinosById);
+
             } catch (err) {
+                console.error(err);
                 setToken(null);
                 localStorage.removeItem('jurassic_token');
             } finally {
@@ -49,7 +64,7 @@ function Aplicacion() {
             }
         };
 
-        obtenerUsuario();
+        obtenerDatosIniciales();
     }, [token]);
 
     const manejarLoginExitoso = (nuevoToken) => {
@@ -57,10 +72,15 @@ function Aplicacion() {
         localStorage.setItem('jurassic_token', nuevoToken);
     };
 
-    // Esta función ya no es necesaria aquí, la pasaremos al mapa
-    // const manejarClickRecinto = async (idDinosaurio) => { ... };
+    const handleDinoSelect = (dinoId) => {
+        if (dinoId && dinos[dinoId]) {
+            setDinoSeleccionado(dinos[dinoId]);
+        }
+    };
 
-    // const cerrarModal = () => { ... }; // Esta función tampoco
+    const handleCloseDinoModal = () => {
+        setDinoSeleccionado(null);
+    };
 
     const renderizarContenido = () => {
         if (cargando) {
@@ -68,21 +88,21 @@ function Aplicacion() {
         }
 
         if (!token) {
-            return <Autenticacion enLoginExitoso={manejarLoginExitoso}/>;
+            return <Autenticacion enLoginExitoso={manejarLoginExitoso} />;
         }
 
         if (usuarioActual?.role === 'admin') {
             return (
-                <>
-                    <AdminDashboard token={token} onSalirClick={iniciarCierreSesion}/>
-                </>
+                <AdminDashboard token={token} onSalirClick={iniciarCierreSesion} />
             );
         }
 
         return (
-            <>
-                <MapaJurassic onSalirClick={iniciarCierreSesion}/>
-            </>
+            <MapaJurassic
+                onSalirClick={iniciarCierreSesion}
+                onDinoSelect={handleDinoSelect}
+                token={token}
+            />
         );
     };
 
@@ -95,6 +115,11 @@ function Aplicacion() {
                 onClose={() => setModalAbierto(false)}
                 onConfirm={manejarCierreSesion}
                 message="¿Quieres abandonar el parque?"
+            />
+
+            <DinoModal
+                dino={dinoSeleccionado}
+                onClose={handleCloseDinoModal}
             />
         </div>
     );

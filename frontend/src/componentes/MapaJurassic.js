@@ -6,12 +6,12 @@ const ORIGINAL_WIDTH = 1152;
 const ORIGINAL_HEIGHT = 768;
 
 const locations = [
-    {"name": "Recinto Carnívoros", "x": 236, "y": 290, "r": 8},
-    {"name": "Recinto Herbívoros", "x": 334, "y": 374, "r": 8},
-    {"name": "Recinto Aviario", "x": 500, "y": 438, "r": 8},
+    {"name": "Recinto Carnívoros", "x": 236, "y": 290, "r": 8, "dinoId": "dino_001"},
+    {"name": "Recinto Herbívoros", "x": 334, "y": 374, "r": 8, "dinoId": "dino_004"},
+    {"name": "Recinto Aviario", "x": 500, "y": 438, "r": 8, "dinoId": "dino_003"},
     {"name": "Puerta", "x": 857, "y": 620, "r": 8},
     {"name": "Coche", "x": 608, "y": 658, "r": 8},
-    {"name": "Recinto Acuario", "x": 862, "y": 159, "r": 8},
+    {"name": "Recinto Acuario", "x": 862, "y": 159, "r": 8, "dinoId": "dino_002"},
     {"name": "Guardas", "x": 484, "y": 336, "r": 8},
     {"name": "Helipuerto", "x": 575, "y": 175, "r": 8},
 ];
@@ -21,7 +21,8 @@ const MapaImage = ({width, height}) => {
     return <Image image={image} width={width} height={height}/>;
 };
 
-const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick}) => {
+// <-- CAMBIO 2: Aceptamos 'onDinoSelect' como prop
+const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const scaleAvg = (scaleX + scaleY) / 2;
@@ -57,18 +58,21 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick}) => {
             shadowColor="black"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+
             onClick={() => {
                 if (point.name === "Puerta" && onSalirClick) {
                     onSalirClick();
+                } else if (point.dinoId && onDinoSelect) {
+                    onDinoSelect(point.dinoId);
                 } else {
-                    alert(`Has hecho clic en: ${point.name}`);
+                    console.log(`Clic en: ${point.name} (sin acción)`);
                 }
             }}
         />
     );
 };
 
-const MapaJurassic = ({ onSalirClick }) => {
+const MapaJurassic = ({ onSalirClick, onDinoSelect }) => {
     const wrapperRef = useRef(null);
     const [size, setSize] = useState({width: ORIGINAL_WIDTH, height: ORIGINAL_HEIGHT});
     const [tooltip, setTooltip] = useState(null);
@@ -141,6 +145,7 @@ const MapaJurassic = ({ onSalirClick }) => {
                             scaleY={scaleY}
                             onHover={handlePointHover}
                             onSalirClick={onSalirClick}
+                            onDinoSelect={onDinoSelect}
                         />
                     ))}
 
