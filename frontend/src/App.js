@@ -1,7 +1,9 @@
-// frontend/src/App.js
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminDashboard from './componentes/AdminDashboard';
 import Autenticacion from './componentes/Auth';
+import Registro from './componentes/Registro';
+import ForceChangePassword from './componentes/ForceChangePassword';
+import VerificarEmail from './componentes/VerificarEmail';
 import MapaJurassic from './componentes/MapaJurassic';
 import ModalConfirmacion from './componentes/ModalConfirmacion';
 import DinoModal from './componentes/DinoModal';
@@ -20,13 +22,20 @@ function Aplicacion() {
     const [dinos, setDinos] = useState({});
 
     const [labModalAbierto, setLabModalAbierto] = useState(false);
-    const [labModalPhase, setLabModalPhase] = useState('helicopter'); // 'helicopter' o 'lab'
+    const [labModalPhase, setLabModalPhase] = useState('helicopter');
+
+    const [pantallaAuth, setPantallaAuth] = useState('login'); // 'login', 'register', 'forceChange', 'verifyEmail'
+    const [tokenLimitado, setTokenLimitado] = useState(null);
+    const [emailParaVerificar, setEmailParaVerificar] = useState(null); // <-- NUEVO ESTADO
 
     const manejarCierreSesion = useCallback(() => {
         setToken(null);
         setUsuarioActual(null);
         localStorage.removeItem('jurassic_token');
         setModalAbierto(false);
+        setPantallaAuth('login');
+        setEmailParaVerificar(null);
+        setTokenLimitado(null);
     }, []);
 
     const iniciarCierreSesion = () => {
@@ -41,7 +50,7 @@ function Aplicacion() {
 
         const obtenerDatosIniciales = async () => {
             try {
-                // 1. Obtener usuario
+
                 const userRes = await fetch(`${API_URL}/auth/me`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -63,6 +72,7 @@ function Aplicacion() {
                 console.error(err);
                 setToken(null);
                 localStorage.removeItem('jurassic_token');
+                setPantallaAuth('login');
             } finally {
                 setCargando(false);
             }
@@ -93,11 +103,29 @@ function Aplicacion() {
 
         setTimeout(() => {
             setLabModalPhase('lab');
-        }, 2000); // 2000 ms = 2 segundos
+        }, 2000);
     };
 
     const handleCloseLabModal = () => {
         setLabModalAbierto(false);
+    };
+
+    const irARegistro = () => setPantallaAuth('register');
+
+    const irALogin = () => {
+        setPantallaAuth('login');
+        setTokenLimitado(null);
+        setEmailParaVerificar(null);
+    };
+
+    const irAForceChange = (tokenForzado) => {
+        setTokenLimitado(tokenForzado);
+        setPantallaAuth('forceChange');
+    };
+
+    const irAVerificar = (email) => {
+        setEmailParaVerificar(email);
+        setPantallaAuth('verifyEmail');
     };
 
 
@@ -107,7 +135,30 @@ function Aplicacion() {
         }
 
         if (!token) {
-            return <Autenticacion enLoginExitoso={manejarLoginExitoso} />;
+            if (pantallaAuth === 'login') {
+                return <Autenticacion
+                    enLoginExitoso={manejarLoginExitoso}
+                    onNavigateToRegister={irARegistro}
+                    onForceChangePassword={irAForceChange}
+                />;
+            }
+            if (pantallaAuth === 'register') {
+                return <Registro
+                    onRegistroExitoso={irAVerificar}
+                />;
+            }
+            if (pantallaAuth === 'forceChange') {
+                return <ForceChangePassword
+                    token={tokenLimitado}
+                    onPasswordChanged={irALogin}
+                />
+            }
+            if (pantallaAuth === 'verifyEmail') {
+                return <VerificarEmail
+                    email={emailParaVerificar}
+                    onVerificationSuccess={irALogin}
+                />
+            }
         }
 
         if (usuarioActual?.role === 'admin') {
@@ -120,7 +171,7 @@ function Aplicacion() {
             <MapaJurassic
                 onSalirClick={iniciarCierreSesion}
                 onDinoSelect={handleDinoSelect}
-                onHelipuertoClick={handleHelipuertoClick} // <-- 4. PASAR EL MANEJADOR
+                onHelipuertoClick={handleHelipuertoClick}
                 token={token}
             />
         );

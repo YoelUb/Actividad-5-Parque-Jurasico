@@ -27,6 +27,9 @@ def crear_token_acceso(data: Dict[str, Any], expires_delta: Optional[timedelta] 
 def verificar_contrasena(contrasena_plana, contrasena_hasheada):
     return contexto_pwd.verify(contrasena_plana, contrasena_hasheada)
 
+def hashear_contrasena(contrasena_plana: str) -> str:
+    return contexto_pwd.hash(contrasena_plana)
+
 def obtener_usuario_desde_token(token: str) -> UsuarioAuth:
     excepcion_credenciales = HTTPException(
         status_code=401,

@@ -4,9 +4,10 @@ services:
     build: .
     container_name: parque_jurasico-app
     command: >
-        sh -c "uvicorn src.parque_jurasico.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir src"
+      sh -c "chmod +x ./startup.sh && ./startup.sh"
     volumes:
       - ./src:/app/src
+      - ./startup.sh:/app/startup.sh
     ports:
       - "8000:8000"
     env_file:
@@ -40,7 +41,7 @@ services:
       - parque_jurasico-bd:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 5

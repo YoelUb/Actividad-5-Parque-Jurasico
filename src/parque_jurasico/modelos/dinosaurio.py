@@ -1,32 +1,38 @@
-from pydantic import BaseModel
-from typing import Literal, List, Optional
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from src.parque_jurasico.bd.BaseDatos import Base
+from datetime import datetime, timedelta, timezone
 
-TipoRecinto = Literal["terrestre", "acuatico", "aviario", "edificio", "paisaje"]
 
-class Dinosaurio(BaseModel):
-    id: str
-    nombre: str
-    era: str
-    area: str
-    dieta: str
-    tipo_recinto: TipoRecinto
+class Usuario(Base):
+    __tablename__ = "usuarios"
 
-class Recinto(BaseModel):
-    grid_id: str
-    nombre: str
-    tipo: TipoRecinto
-    id_dinosaurio: Optional[str] = None
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)  # Email
+    nombre = Column(String, nullable=False)
+    apellidos = Column(String, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    role = Column(String, default="visitante")
+    acepta_publicidad = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=False, nullable=False)
+    must_change_password = Column(Boolean, default=False)
 
-class DisenoParque(BaseModel):
-    tamano_grid: List[int] = [3, 3]
-    recintos: List[Recinto]
+    verification_tokens = relationship("EmailVerificationToken", back_populates="user", cascade="all, delete-orphan")
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
 
-class Usuario(BaseModel):
-    username: str
+class EmailVerificationToken(Base):
+    """
+    Tabla para almacenar los tokens de verificación de email.
+    """
+    __tablename__ = "email_verification_tokens"
 
-class UsuarioAuth(Usuario):
-    role: str
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String, unique=True, index=True, nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Clave foránea al usuario
+    user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    user = relationship("Usuario", back_populates="verification_tokens")
+
+    def is_expired(self):
+        return datetime.now(timezone.utc) > self.expires_at

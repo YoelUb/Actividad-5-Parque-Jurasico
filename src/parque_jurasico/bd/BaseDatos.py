@@ -1,100 +1,35 @@
-from typing import Dict, List
-from passlib.context import CryptContext
-from src.parque_jurasico.modelos.dinosaurio import Dinosaurio, Recinto, DisenoParque
+import os
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-contexto_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+load_dotenv()
 
-usuarios_falsos_db = {
-    "admin": {
-        "username": "admin",
-        "hashed_password": contexto_pwd.hash("admin123"),
-        "role": "admin"
-    },
-    "visitante1": {
-        "username": "visitante1",
-        "hashed_password": contexto_pwd.hash("pass123"),
-        "role": "visitante"
-    }
-}
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+DB_HOST = os.getenv("DB_HOST", "postgres-db")
+DB_NAME = os.getenv("DB_NAME", "parque_jurasico")
+DB_PORT = os.getenv("DB_PORT", 5432)
 
-DINOSAURIOS_DB: Dict[str, Dinosaurio] = {
-    "dino_001": Dinosaurio(
-        id="dino_001",
-        nombre="Tyrannosaurus Rex",
-        era="Cretácico",
-        area="Sector Norte",
-        dieta="Carnívoro",
-        tipo_recinto="terrestre"
-    ),
-    "dino_002": Dinosaurio(
-        id="dino_002",
-        nombre="Mosasaurus",
-        era="Cretácico",
-        area="La Laguna",
-        dieta="Carnívoro",
-        tipo_recinto="acuatico"
-    ),
-    "dino_003": Dinosaurio(
-        id="dino_003",
-        nombre="Pteranodon",
-        era="Cretácico",
-        area="El Domo",
-        dieta="Piscívoro",
-        tipo_recinto="aviario"
-    ),
-    "dino_004": Dinosaurio(
-        id="dino_004",
-        nombre="Triceratops",
-        era="Cretácico",
-        area="Pradera Este",
-        dieta="Herbívoro",
-        tipo_recinto="terrestre"
-    ),
-    "dino_005": Dinosaurio(
-        id="dino_005",
-        nombre="Brachiosaurus",
-        era="Jurásico",
-        area="Gran Valle",
-        dieta="Herbívoro",
-        tipo_recinto="terrestre"
-    ),
-    "dino_006": Dinosaurio(
-        id="dino_006",
-        nombre="Velociraptor",
-        era="Cretácico",
-        area="Sector de Contención",
-        dieta="Carnívoro",
-        tipo_recinto="terrestre"
-    ),
-}
+DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-RECINTOS_LIST: List[Recinto] = [
-    Recinto(grid_id="a1", nombre="Camino de Entrada", tipo="edificio"),
-    Recinto(grid_id="a2", nombre="Recinto del T-Rex", tipo="terrestre", id_dinosaurio="dino_001"),
-    Recinto(grid_id="a3", nombre="Contención de Raptors", tipo="terrestre", id_dinosaurio="dino_006"),
+engine = create_async_engine(DATABASE_URL, echo=True)
 
-    Recinto(grid_id="b1", nombre="Camino Principal", tipo="edificio"),
-    Recinto(grid_id="b2", nombre="La Laguna", tipo="acuatico", id_dinosaurio="dino_002"),
-    Recinto(grid_id="b3", nombre="Domo Aviario", tipo="aviario", id_dinosaurio="dino_003"),
-
-    Recinto(grid_id="c1", nombre="Bosque", tipo="paisaje"),
-    Recinto(grid_id="c2", nombre="Pradera de Triceratops", tipo="terrestre", id_dinosaurio="dino_004"),
-    Recinto(grid_id="c3", nombre="El Gran Valle", tipo="terrestre", id_dinosaurio="dino_005"),
-]
-
-DISENO_DEL_PARQUE = DisenoParque(
-    tamano_grid=[3, 3],
-    recintos=RECINTOS_LIST
+SessionLocal = sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
 )
 
-def crear_nuevo_dinosaurio(dino: Dinosaurio) -> Dinosaurio:
-    if dino.id in DINOSAURIOS_DB:
-        raise ValueError("El ID del dinosaurio ya existe")
-    DINOSAURIOS_DB[dino.id] = dino
-    return dino
+Base = declarative_base()
 
-def obtener_todos_los_dinosaurios() -> List[Dinosaurio]:
-    return list(DINOSAURIOS_DB.values())
+async def get_db_session() -> AsyncSession:
+    """Dependencia de FastAPI para obtener una sesión de BD."""
+    async with SessionLocal() as session:
+        yield session
 
-def obtener_todos_los_recintos() -> List[Recinto]:
-    return DISENO_DEL_PARQUE.recintos
+async def init_db():
+    """Inicializa la base de datos y crea las tablas."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
