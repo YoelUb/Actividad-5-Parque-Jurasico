@@ -21,8 +21,7 @@ const MapaImage = ({width, height}) => {
     return <Image image={image} width={width} height={height}/>;
 };
 
-// <-- CAMBIO 2: Aceptamos 'onDinoSelect' como prop
-const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect}) => {
+const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, onHelipuertoClick}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const scaleAvg = (scaleX + scaleY) / 2;
@@ -64,6 +63,8 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect}) 
                     onSalirClick();
                 } else if (point.dinoId && onDinoSelect) {
                     onDinoSelect(point.dinoId);
+                } else if (point.name === "Helipuerto" && onHelipuertoClick) { // <-- AÑADIDO
+                    onHelipuertoClick();
                 } else {
                     console.log(`Clic en: ${point.name} (sin acción)`);
                 }
@@ -72,7 +73,7 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect}) 
     );
 };
 
-const MapaJurassic = ({ onSalirClick, onDinoSelect }) => {
+const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick }) => {
     const wrapperRef = useRef(null);
     const [size, setSize] = useState({width: ORIGINAL_WIDTH, height: ORIGINAL_HEIGHT});
     const [tooltip, setTooltip] = useState(null);
@@ -146,6 +147,7 @@ const MapaJurassic = ({ onSalirClick, onDinoSelect }) => {
                             onHover={handlePointHover}
                             onSalirClick={onSalirClick}
                             onDinoSelect={onDinoSelect}
+                            onHelipuertoClick={onHelipuertoClick} // <-- 4. PASAR LA PROP
                         />
                     ))}
 

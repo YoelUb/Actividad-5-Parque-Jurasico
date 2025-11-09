@@ -5,6 +5,7 @@ import Autenticacion from './componentes/Auth';
 import MapaJurassic from './componentes/MapaJurassic';
 import ModalConfirmacion from './componentes/ModalConfirmacion';
 import DinoModal from './componentes/DinoModal';
+import LabModal from './componentes/LabModal';
 import './App.css';
 
 const API_URL = 'http://localhost:8000/api';
@@ -17,6 +18,9 @@ function Aplicacion() {
 
     const [dinoSeleccionado, setDinoSeleccionado] = useState(null);
     const [dinos, setDinos] = useState({});
+
+    const [labModalAbierto, setLabModalAbierto] = useState(false);
+    const [labModalPhase, setLabModalPhase] = useState('helicopter'); // 'helicopter' o 'lab'
 
     const manejarCierreSesion = useCallback(() => {
         setToken(null);
@@ -82,6 +86,21 @@ function Aplicacion() {
         setDinoSeleccionado(null);
     };
 
+    const handleHelipuertoClick = () => {
+        setLabModalPhase('helicopter');
+        setLabModalAbierto(true);
+
+
+        setTimeout(() => {
+            setLabModalPhase('lab');
+        }, 2000); // 2000 ms = 2 segundos
+    };
+
+    const handleCloseLabModal = () => {
+        setLabModalAbierto(false);
+    };
+
+
     const renderizarContenido = () => {
         if (cargando) {
             return <h1>Cargando...</h1>;
@@ -101,6 +120,7 @@ function Aplicacion() {
             <MapaJurassic
                 onSalirClick={iniciarCierreSesion}
                 onDinoSelect={handleDinoSelect}
+                onHelipuertoClick={handleHelipuertoClick} // <-- 4. PASAR EL MANEJADOR
                 token={token}
             />
         );
@@ -120,6 +140,12 @@ function Aplicacion() {
             <DinoModal
                 dino={dinoSeleccionado}
                 onClose={handleCloseDinoModal}
+            />
+
+            <LabModal
+                isOpen={labModalAbierto}
+                phase={labModalPhase}
+                onClose={handleCloseLabModal}
             />
         </div>
     );
