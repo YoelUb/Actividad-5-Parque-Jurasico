@@ -24,7 +24,7 @@ function VerificarEmail({ email, onVerificationSuccess }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email,
-          token: token,
+          code: token,
         }),
       });
 

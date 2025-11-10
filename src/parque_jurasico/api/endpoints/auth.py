@@ -107,11 +107,10 @@ async def register_user(
 
 @router.post("/verify-email")
 async def verify_email(
-        email: str,
-        code: str,
+        data: modelos.VerificationRequest,
         db: AsyncSession = Depends(get_db_session)
 ):
-    result = await db.execute(select(UsuarioDBModel).where(UsuarioDBModel.username == email))
+    result = await db.execute(select(UsuarioDBModel).where(UsuarioDBModel.username == data.email))
     usuario_db = result.scalars().first()
 
     if not usuario_db:
@@ -127,7 +126,7 @@ async def verify_email(
     result = await db.execute(query)
     token_db = result.scalars().first()
 
-    if not token_db or token_db.token != code:
+    if not token_db or token_db.token != data.code:
         raise HTTPException(status_code=400, detail="Código de verificación inválido")
 
     if token_db.is_expired():
@@ -157,8 +156,23 @@ async def force_change_password(
             detail="La nueva contraseña no cumple con los requisitos de seguridad."
         )
 
+    if current_user.username != password_data.new_username:
+        result = await db.execute(
+            select(UsuarioDBModel).where(UsuarioDBModel.username == password_data.new_username)
+        )
+        existing_user = result.scalars().first()
+
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El nuevo correo electrónico ya está registrado."
+            )
+
+        current_user.username = password_data.new_username
+
     current_user.hashed_password = seguridad.hashear_contrasena(password_data.new_password)
     current_user.must_change_password = False
+
     await db.commit()
 
-    return {"message": "Contraseña actualizada exitosamente. Por favor, inicie sesión de nuevo."}
+    return {"message": "Usuario y contraseña actualizados exitosamente. Por favor, inicie sesión de nuevo."}

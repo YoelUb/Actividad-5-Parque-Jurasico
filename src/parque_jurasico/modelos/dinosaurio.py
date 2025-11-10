@@ -92,6 +92,7 @@ class UserReadSchema(BaseModel):
         from_attributes = True
 
 class NewPassword(BaseModel):
+    new_username: EmailStr
     new_password: str
 
 class DinosaurioSchema(BaseModel):
@@ -114,6 +115,13 @@ class RecintoSchema(BaseModel):
     y: int
     r: int
     dino_id_str: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class VerificationRequest(BaseModel):
+    email: EmailStr
+    code: str
 
     class Config:
         from_attributes = True

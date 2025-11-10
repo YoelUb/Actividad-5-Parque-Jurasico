@@ -25,6 +25,19 @@ function ForceChangePassword({ token, onPasswordChanged }) {
     e.preventDefault();
     setError(null);
 
+    // Regex simple para validación de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.new_username) {
+      setError('Debes introducir un nuevo correo electrónico.');
+      return;
+    }
+
+    if (!emailRegex.test(formData.new_username)) {
+      setError('El formato del correo electrónico no es válido.');
+      return;
+    }
+
     if (formData.new_password.length < 8) {
       setError('La nueva contraseña debe tener al menos 8 caracteres.');
       return;
