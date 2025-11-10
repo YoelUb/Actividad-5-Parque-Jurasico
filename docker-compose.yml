@@ -1,10 +1,10 @@
+# docker-compose.yml
 services:
 
   app:
     build: .
     container_name: parque_jurasico-app
-    command: >
-      sh -c "chmod +x ./startup.sh && ./startup.sh"
+    command: sh startup.sh
     volumes:
       - ./src:/app/src
       - ./startup.sh:/app/startup.sh
@@ -24,7 +24,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend/src:/app/src
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - app
 

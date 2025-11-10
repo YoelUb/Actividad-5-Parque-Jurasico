@@ -1,4 +1,3 @@
-# src/parque_jurasico/create_admin.py
 import asyncio
 import os
 from sqlalchemy.future import select
@@ -7,7 +6,7 @@ from src.parque_jurasico.modelos.dinosaurio import Usuario
 from src.parque_jurasico.security.seguridad import hashear_contrasena
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@parque.jp")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Admin123")
 
 
 async def create_admin_user():
@@ -34,8 +33,8 @@ async def create_admin_user():
                 apellidos="InGen",
                 hashed_password=hashed_password,
                 role="admin",
-                acepta_publicidad=False,
                 is_active=True,
+                acepta_publicidad=False,
                 must_change_password=True
             )
 

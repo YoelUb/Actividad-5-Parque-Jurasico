@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
 import MapaJurassic from './MapaJurassic';
@@ -11,9 +11,11 @@ const AdminDashboard = ({ onSalirClick }) => {
 
     const token = localStorage.getItem('token');
 
-    const authHeaders = {
+    // --- 2. Envolver authHeaders en useMemo ---
+    const authHeaders = useMemo(() => ({
         headers: { Authorization: `Bearer ${token}` }
-    };
+    }), [token]);
+    // ------------------------------------------
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,7 +35,7 @@ const AdminDashboard = ({ onSalirClick }) => {
         if (token) {
             fetchData();
         }
-    }, [token]);
+    }, [token, authHeaders]); // <-- 3. Añadir authHeaders al array de dependencias
 
 
     const handleDinoSubmit = async (e) => {
@@ -133,7 +135,7 @@ const AdminDashboard = ({ onSalirClick }) => {
                 <ul className="data-list">
                     {users.map(user => (
                         <li key={user.id}>
-                            {user.username} - {user.is_admin ? <strong>(Admin)</strong> : '(Usuario)'}
+                            {user.username} - {user.is_admin ? Boolean(user.is_admin) && <strong>(Admin)</strong> : '(Usuario)'}
                         </li>
                     ))}
                 </ul>

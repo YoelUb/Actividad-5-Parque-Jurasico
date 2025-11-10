@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import './Auth.css';
+import './Registro.css';
 
 const API_URL = 'http://localhost:8000/api';
 
 function Autenticacion({ enLoginExitoso, onNavigateToRegister, onForceChangePassword }) {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // <-- 1. Estado añadido
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
 
@@ -36,7 +38,6 @@ function Autenticacion({ enLoginExitoso, onNavigateToRegister, onForceChangePass
       } else {
         enLoginExitoso(data.access_token);
       }
-      // -----------------------------
 
     } catch (err) {
       setError(err.message);
@@ -56,15 +57,26 @@ function Autenticacion({ enLoginExitoso, onNavigateToRegister, onForceChangePass
           onChange={(e) => setUsuario(e.target.value)}
           required
         />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={contrasena}
-          onChange={(e) => setContrasena(e.target.value)}
-          required
-        />
+
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Contraseña"
+            value={contrasena}
+            onChange={(e) => setContrasena(e.target.value)}
+            required
+          />
+          <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="password-toggle-text"
+          >
+              {showPassword ? 'Ocultar' : 'Mostrar'}
+          </button>
+        </div>
+
         {error && <p className="error">{error}</p>}
-        <button type-"submit" disabled={cargando}>
+        <button type="submit" disabled={cargando}>
           {cargando ? 'Cargando...' : 'Entrar al Parque'}
         </button>
       </form>

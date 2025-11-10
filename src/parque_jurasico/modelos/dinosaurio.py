@@ -30,7 +30,6 @@ class EmailVerificationToken(Base):
     token = Column(String, unique=True, index=True, nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
 
-    # Clave foránea al usuario
     user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     user = relationship("Usuario", back_populates="verification_tokens")
 

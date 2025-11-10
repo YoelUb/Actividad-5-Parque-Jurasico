@@ -16,6 +16,8 @@ function Registro({ onRegistroExitoso }) {
     const [error, setError] = useState(null);
     const [cargando, setCargando] = useState(false);
 
+    const PASSWORD_POLICY_ERROR = "Contraseña T-Rex: Mín. 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#$%^&*())";
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
@@ -35,8 +37,9 @@ function Registro({ onRegistroExitoso }) {
             return false;
         }
 
-        if (formData.password.length < 8) {
-            setError('La contraseña debe tener al menos 8 caracteres.');
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()]).{8,}$/;
+        if (!passwordRegex.test(formData.password)) {
+            setError(PASSWORD_POLICY_ERROR);
             return false;
         }
 
@@ -69,9 +72,10 @@ function Registro({ onRegistroExitoso }) {
                 }),
             });
 
+            const data = await respuesta.json();
+
             if (!respuesta.ok) {
-                const errData = await respuesta.json();
-                throw new Error(errData.detail || 'Error al registrar el usuario');
+                throw new Error(data.detail || 'Error al registrar el usuario');
             }
 
             onRegistroExitoso(formData.email);
@@ -115,7 +119,7 @@ function Registro({ onRegistroExitoso }) {
                     <input
                         type={showPassword ? "text" : "password"}
                         name="password"
-                        placeholder="Contraseña (mín. 8 caracteres)"
+                        placeholder="Contraseña"
                         value={formData.password}
                         onChange={handleChange}
                         required

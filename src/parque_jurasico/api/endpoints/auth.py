@@ -1,4 +1,3 @@
-# src/parque_jurasico/api/endpoints/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta, datetime, timezone
@@ -28,6 +27,9 @@ class ForcePasswordChangePayload(BaseModel):
 class VerifyEmailPayload(BaseModel):
     email: EmailStr
     token: str
+
+
+PASSWORD_POLICY_ERROR = "La contraseña no cumple con los requisitos LOPD: Mín. 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#$%^&*())"
 
 
 
@@ -82,6 +84,12 @@ async def registrar_usuario(
         raise HTTPException(
             status_code=400,
             detail="El correo electrónico ya está registrado",
+        )
+
+    if not seguridad.validar_contrasena_rex(user_in.password):
+        raise HTTPException(
+            status_code=400,
+            detail=PASSWORD_POLICY_ERROR,
         )
 
     hashed_password = seguridad.hashear_contrasena(user_in.password)
@@ -140,7 +148,6 @@ async def verify_email(
         payload: VerifyEmailPayload,
         db: AsyncSession = Depends(get_db_session)
 ):
-    # 1. Buscar al usuario
     usuario_db = await seguridad.get_user_by_username(db, payload.email)
     if not usuario_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
@@ -148,7 +155,6 @@ async def verify_email(
     if usuario_db.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La cuenta ya está activa")
 
-    # 2. Buscar el token
     result = await db.execute(
         select(EmailVerificationToken).where(
             EmailVerificationToken.user_id == usuario_db.id,
@@ -171,12 +177,10 @@ async def verify_email(
     return {"message": "¡Verificación completada! Ya puedes iniciar sesión."}
 
 
-
-
 @router.post("/auth/force-change-password", status_code=status.HTTP_204_NO_CONTENT)
 async def force_change_password(
         payload: ForcePasswordChangePayload,
-        current_user: models.UsuarioAuth = Depends(seguridad.obtener_usuario_actual),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual),
         db: AsyncSession = Depends(get_db_session)
 ):
     usuario_db = await seguridad.get_user_by_username(db, current_user.username)
@@ -192,6 +196,12 @@ async def force_change_password(
                 detail="El nuevo nombre de usuario (email) ya está en uso."
             )
 
+    if not seguridad.validar_contrasena_rex(payload.new_password):
+        raise HTTPException(
+            status_code=400,
+            detail=PASSWORD_POLICY_ERROR,
+        )
+
     usuario_db.username = payload.new_username
     usuario_db.hashed_password = seguridad.hashear_contrasena(payload.new_password)
     usuario_db.must_change_password = False
@@ -199,4 +209,4 @@ async def force_change_password(
     db.add(usuario_db)
     await db.commit()
 
-    return {"detail": "Contraseña y usuario actualizados correctamente."}
+    return NoneS
