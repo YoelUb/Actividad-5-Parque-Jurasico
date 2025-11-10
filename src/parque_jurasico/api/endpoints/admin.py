@@ -5,7 +5,13 @@ from sqlalchemy.future import select
 from sqlalchemy.sql import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.parque_jurasico.modelos import dinosaurio as modelos
-from src.parque_jurasico.modelos.dinosaurio import Usuario as UsuarioDBModel, HistorialEnviosPubli
+from src.parque_jurasico.modelos.dinosaurio import (
+    Usuario as UsuarioDBModel,
+    HistorialEnviosPubli,
+    Dinosaurio as DinosaurioDBModel,
+    Recinto as RecintoDBModel
+)
+
 from src.parque_jurasico.security import seguridad, auditing
 from src.parque_jurasico.bd.BaseDatos import get_db_session
 from src.parque_jurasico.core.email_config import fm
@@ -13,7 +19,6 @@ from fastapi_mail import MessageSchema
 
 router = APIRouter()
 
-# HTML para el correo promocional
 EMAIL_PROMO_HTML = """
 <html>
   <body style="font-family:Arial, sans-serif; background-color:#f9f9f9; padding:20px;">
@@ -41,7 +46,6 @@ async def enviar_correo_promocional(
         admin_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin),
         db: AsyncSession = Depends(get_db_session)
 ):
-    # 1. Comprobar la regla de 1 envío por semana
     stmt_ultimo_envio = select(HistorialEnviosPubli).order_by(HistorialEnviosPubli.timestamp.desc()).limit(1)
     result_ultimo_envio = await db.execute(stmt_ultimo_envio)
     ultimo_envio = result_ultimo_envio.scalars().first()
@@ -95,23 +99,41 @@ async def get_logs(admin_user: modelos.UsuarioAuth = Depends(seguridad.get_curre
 
 
 @router.get("/dinosaurios", response_model=List[modelos.Dinosaurio])
-async def get_all_dinosaurios(admin_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)):
-    return bd.obtener_todos_los_dinosaurios()
+async def get_all_dinosaurios(
+        db: AsyncSession = Depends(get_db_session)
+):
+    stmt = select(DinosaurioDBModel)
+    result = await db.execute(stmt)
+    dinos = result.scalars().all()
+    return dinos
 
 
 @router.post("/dinosaurios", response_model=modelos.Dinosaurio)
 async def create_dinosaurio(
         dino: modelos.Dinosaurio = Body(...),
-        admin_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+        admin_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin),
+        db: AsyncSession = Depends(get_db_session)
 ):
     try:
-        nuevo_dino = db.crear_nuevo_dinosaurio(dino)
-        auditing.log_admin_action(admin_user.username, f"Creó el dinosaurio: {nuevo_dino.nombre} (ID: {nuevo_dino.id})")
-        return nuevo_dino
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        nuevo_dino_db = DinosaurioDBModel(**dino.model_dump())
+
+        db.add(nuevo_dino_db)
+        await db.commit()
+        await db.refresh(nuevo_dino_db)
+
+        auditing.log_admin_action(admin_user.username,
+                                  f"Creó el dinosaurio: {nuevo_dino_db.nombre} (ID: {nuevo_dino_db.id})")
+        return nuevo_dino_db
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error al crear el dinosaurio: {e}")
 
 
 @router.get("/recintos", response_model=List[modelos.Recinto])
-async def get_all_recintos(admin_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)):
-    return db.obtener_todos_los_recintos()
+async def get_all_recintos(
+        db: AsyncSession = Depends(get_db_session)
+):
+    stmt = select(RecintoDBModel)
+    result = await db.execute(stmt)
+    recintos = result.scalars().all()
+    return recintos

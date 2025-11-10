@@ -2,7 +2,7 @@ import os
 import random
 import string
 from pydantic_settings import BaseSettings
-from fastapi_mail import ConnectionConfig
+from fastapi_mail import ConnectionConfig, FastMail
 
 from dotenv import load_dotenv
 
@@ -22,7 +22,6 @@ class EmailSettings(BaseSettings):
     VALIDATE_CERTS: bool = os.getenv("VALIDATE_CERTS", "True").lower() == "true"
 
     class Config:
-        # Aquí está la corrección:
         extra = 'ignore'
 
 
@@ -41,6 +40,8 @@ conf = ConnectionConfig(
     VALIDATE_CERTS=settings.VALIDATE_CERTS,
     TEMPLATE_FOLDER='./src/parque_jurasico/templates/email'
 )
+
+fm = FastMail(conf)
 
 
 def generate_verification_code(length: int = 6) -> str:

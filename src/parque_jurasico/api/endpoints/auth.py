@@ -209,4 +209,4 @@ async def force_change_password(
     db.add(usuario_db)
     await db.commit()
 
-    return NoneS
+    return None
