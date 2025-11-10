@@ -18,6 +18,7 @@ DB_PORT = os.getenv("DB_PORT", 5432)
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
+
 SessionLocal = sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -26,10 +27,6 @@ SessionLocal = sessionmaker(
 
 
 async def init_db():
-    """
-    Inicializa la base de datos y crea todas las tablas definidas en los modelos
-    que heredan de 'Base'.
-    """
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -47,15 +44,11 @@ async def init_db():
 
 
 async def create_default_data():
-    """
-    Crea el usuario administrador, los dinosaurios y los recintos por defecto
-    si no existen en la base de datos.
-    """
     print("Iniciando creación de datos por defecto...")
     async with SessionLocal() as db:
         try:
-            admin_username = os.getenv("ADMIN_USER", "admin@parque.com")
-            admin_password = os.getenv("ADMIN_PASSWORD", "Admin123*")
+            admin_username = os.getenv("ADMIN_USER", "administrador")
+            admin_password = os.getenv("ADMIN_PASSWORD", "admin")
 
             result = await db.execute(select(Usuario).where(Usuario.username == admin_username))
             admin_existe = result.scalars().first()
@@ -70,7 +63,7 @@ async def create_default_data():
                     hashed_password=hashed_pass,
                     role="admin",
                     is_active=True,
-                    must_change_password=False
+                    must_change_password=True
                 )
                 db.add(admin_user)
                 print("Usuario administrador creado.")
@@ -160,7 +153,6 @@ async def create_default_data():
 
 
 async def main():
-    """Función principal para ejecutar la inicialización."""
     print("Iniciando script de inicialización de BBDD...")
     await init_db()
     await create_default_data()

@@ -1,36 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta, datetime, timezone
+from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, EmailStr
-from fastapi_mail import MessageSchema
-from src.parque_jurasico.security import seguridad
-from src.parque_jurasico.modelos import dinosaurio as modelos
-from src.parque_jurasico.bd.BaseDatos import get_db_session
-from src.parque_jurasico.modelos.dinosaurio import Usuario as UsuarioDBModel
-from src.parque_jurasico.modelos.dinosaurio import EmailVerificationToken
-from src.parque_jurasico.core.email_config import (
-    fm,
-    create_jurassic_park_email_template,
-    generate_verification_code
-)
 from sqlalchemy.future import select
+from ...bd.BaseDatos import get_db_session
+from ...security import seguridad
+from ...modelos import dinosaurio as modelos
+from ...modelos.dinosaurio import Usuario as UsuarioDBModel
+from ...core import email_config
+from datetime import timedelta, datetime, timezone
 
 router = APIRouter()
-
-
-class ForcePasswordChangePayload(BaseModel):
-    new_username: EmailStr
-    new_password: str
-
-
-class VerifyEmailPayload(BaseModel):
-    email: EmailStr
-    token: str
-
-
-PASSWORD_POLICY_ERROR = "La contraseña no cumple con los requisitos LOPD: Mín. 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#$%^&*())"
-
 
 
 @router.post("/token", response_model=modelos.Token)
@@ -38,175 +18,147 @@ async def login_para_token(
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: AsyncSession = Depends(get_db_session)
 ):
-    usuario = await seguridad.get_user_by_username(db, form_data.username)
+    result = await db.execute(select(UsuarioDBModel).where(UsuarioDBModel.username == form_data.username))
+    usuario = result.scalars().first()
 
     if not usuario or not seguridad.verificar_contrasena(form_data.password, usuario.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuario o contraseña incorrecto",
+            detail="Usuario o contraseña incorrectos",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
     if not usuario.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Correo no verificado. Por favor, revisa tu bandeja de entrada.",
+            detail="Usuario inactivo. Por favor, verifica tu correo electrónico."
         )
 
-    expires_delta = timedelta(minutes=seguridad.MINUTOS_EXPIRACION_TOKEN)
-    force_change = usuario.must_change_password
-
+    access_token_expires = timedelta(minutes=seguridad.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = seguridad.crear_token_acceso(
         data={"sub": usuario.username, "role": usuario.role},
-        expires_delta=expires_delta
+        expires_delta=access_token_expires
     )
 
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "must_change_password": force_change
+        "must_change_password": usuario.must_change_password
     }
 
 
-@router.get("/me", response_model=modelos.UsuarioAuth)
-async def leer_usuario_actual(usuario_actual: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
-    return usuario_actual
-
-
-@router.post("/register", response_model=modelos.UsuarioAuth, status_code=201)
-async def registrar_usuario(
-        user_in: modelos.UserCreate,
+@router.post("/register")
+async def register_user(
+        user: modelos.UserCreate,
         background_tasks: BackgroundTasks,
         db: AsyncSession = Depends(get_db_session)
 ):
-    usuario_existente = await seguridad.get_user_by_username(db, user_in.username)
-    if usuario_existente:
+    if not seguridad.validar_contrasena_rex(user.password):
         raise HTTPException(
-            status_code=400,
-            detail="El correo electrónico ya está registrado",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La contraseña no cumple con los requisitos de seguridad."
         )
 
-    if not seguridad.validar_contrasena_rex(user_in.password):
-        raise HTTPException(
-            status_code=400,
-            detail=PASSWORD_POLICY_ERROR,
-        )
+    result = await db.execute(select(UsuarioDBModel).where(UsuarioDBModel.username == user.username))
+    db_user = result.scalars().first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado")
 
-    hashed_password = seguridad.hashear_contrasena(user_in.password)
+    hashed_password = seguridad.hashear_contrasena(user.password)
 
-    nuevo_usuario_db = UsuarioDBModel(
-        username=user_in.username,
-        nombre=user_in.nombre,
-        apellidos=user_in.apellidos,
+    usuario_db = UsuarioDBModel(
+        username=user.username,
+        nombre=user.nombre,
+        apellidos=user.apellidos,
         hashed_password=hashed_password,
-        role="visitante",
-        acepta_publicidad=user_in.acepta_publicidad,
-        is_active=False,
-        must_change_password=False
+        acepta_publicidad=user.acepta_publicidad,
+        is_active=False
     )
 
-    db.add(nuevo_usuario_db)
+    db.add(usuario_db)
     await db.commit()
-    await db.refresh(nuevo_usuario_db)
+    await db.refresh(usuario_db)
 
-    try:
-        token_code = generate_verification_code()
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=20)
+    verification_code = email_config.generate_verification_code()
+    token_db = modelos.EmailVerificationToken(
+        token=verification_code,
+        user_id=usuario_db.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=20)
+    )
+    db.add(token_db)
+    await db.commit()
 
-        verification_token = EmailVerificationToken(
-            token=token_code,
-            expires_at=expires_at,
-            user_id=nuevo_usuario_db.id
-        )
-        db.add(verification_token)
-        await db.commit()
-
-        html_content = create_jurassic_park_email_template(token_code, nuevo_usuario_db.nombre)
-        message = MessageSchema(
-            subject="[Jurassic Park] Código de Verificación de Cuenta",
-            recipients=[nuevo_usuario_db.username],
-            body=html_content,
-            subtype="html"
-        )
-
-        background_tasks.add_task(fm.send_message, message)
-        print(f"Email de verificación enviado a: {nuevo_usuario_db.username}")
-
-    except Exception as e:
-        print(f"Error al enviar email o crear token: {e}")
-
-    print(f"Nuevo usuario registrado (inactivo): {nuevo_usuario_db.username}")
-
-    return modelos.UsuarioAuth(
-        username=nuevo_usuario_db.username,
-        role=nuevo_usuario_db.role
+    html_content = email_config.create_jurassic_park_email_template(
+        code=verification_code,
+        nombre_usuario=usuario_db.nombre
     )
 
+    message = email_config.MessageSchema(
+        subject="¡Bienvenido a Jurassic Park! Confirma tu correo",
+        recipients=[usuario_db.username],
+        body=html_content,
+        subtype=email_config.MessageType.html
+    )
 
-@router.post("/verify-email", status_code=status.HTTP_200_OK)
+    background_tasks.add_task(email_config.fm.send_message, message)
+
+    return {"message": "Usuario registrado. Por favor, revisa tu correo para el código de verificación."}
+
+
+@router.post("/verify-email")
 async def verify_email(
-        payload: VerifyEmailPayload,
+        email: str,
+        code: str,
         db: AsyncSession = Depends(get_db_session)
 ):
-    usuario_db = await seguridad.get_user_by_username(db, payload.email)
+    result = await db.execute(select(UsuarioDBModel).where(UsuarioDBModel.username == email))
+    usuario_db = result.scalars().first()
+
     if not usuario_db:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     if usuario_db.is_active:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La cuenta ya está activa")
+        return {"message": "El correo ya ha sido verificado."}
 
-    result = await db.execute(
-        select(EmailVerificationToken).where(
-            EmailVerificationToken.user_id == usuario_db.id,
-            EmailVerificationToken.token == payload.token
-        )
-    )
+    query = select(modelos.EmailVerificationToken). \
+        where(modelos.EmailVerificationToken.user_id == usuario_db.id). \
+        order_by(modelos.EmailVerificationToken.expires_at.desc())
+
+    result = await db.execute(query)
     token_db = result.scalars().first()
 
-    if not token_db:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Código de verificación inválido")
+    if not token_db or token_db.token != code:
+        raise HTTPException(status_code=400, detail="Código de verificación inválido")
 
     if token_db.is_expired():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El código ha expirado")
+        raise HTTPException(status_code=400, detail="El código de verificación ha expirado")
 
     usuario_db.is_active = True
-    db.add(usuario_db)
     await db.delete(token_db)
     await db.commit()
 
-    return {"message": "¡Verificación completada! Ya puedes iniciar sesión."}
+    return {"message": "Correo verificado exitosamente. Ya puedes iniciar sesión."}
 
 
-@router.post("/auth/force-change-password", status_code=status.HTTP_204_NO_CONTENT)
+@router.get("/me", response_model=modelos.UsuarioAuth)
+async def read_users_me(current_user: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
+    return current_user
+
+
+@router.post("/force-change-password")
 async def force_change_password(
-        payload: ForcePasswordChangePayload,
-        current_user: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual),
-        db: AsyncSession = Depends(get_db_session)
+        password_data: modelos.NewPassword,
+        db: AsyncSession = Depends(get_db_session),
+        current_user: UsuarioDBModel = Depends(seguridad.get_current_user_force_change)
 ):
-    usuario_db = await seguridad.get_user_by_username(db, current_user.username)
-
-    if not usuario_db:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
-
-    if payload.new_username != usuario_db.username:
-        nuevo_username_existente = await seguridad.get_user_by_username(db, payload.new_username)
-        if nuevo_username_existente:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El nuevo nombre de usuario (email) ya está en uso."
-            )
-
-    if not seguridad.validar_contrasena_rex(payload.new_password):
+    if not seguridad.validar_contrasena_rex(password_data.new_password):
         raise HTTPException(
-            status_code=400,
-            detail=PASSWORD_POLICY_ERROR,
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La nueva contraseña no cumple con los requisitos de seguridad."
         )
 
-    usuario_db.username = payload.new_username
-    usuario_db.hashed_password = seguridad.hashear_contrasena(payload.new_password)
-    usuario_db.must_change_password = False
-
-    db.add(usuario_db)
+    current_user.hashed_password = seguridad.hashear_contrasena(password_data.new_password)
+    current_user.must_change_password = False
     await db.commit()
 
-    return None
+    return {"message": "Contraseña actualizada exitosamente. Por favor, inicie sesión de nuevo."}

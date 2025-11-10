@@ -5,7 +5,8 @@ from sqlalchemy.future import select
 from ...bd.BaseDatos import get_db_session
 from ...security import seguridad
 from ...modelos import dinosaurio as modelos
-from ...modelos.dinosaurio import Usuario, Dinosaurio as DinosaurioTabla, Recinto as RecintoTabla, HistorialEnviosPubli
+from ...modelos.dinosaurio import Usuario, Dinosaurio as DinosaurioTabla, Recinto as RecintoTabla, HistorialEnviosPubli, \
+    UserReadSchema
 from ...core import email_config
 import logging
 
@@ -18,7 +19,7 @@ async def read_users_me(current_user: modelos.UsuarioAuth = Depends(seguridad.ob
     return current_user
 
 
-@router.get("/users/", response_model=List[modelos.UserCreate])
+@router.get("/users/", response_model=List[UserReadSchema])
 async def read_users(
         skip: int = 0,
         limit: int = 100,

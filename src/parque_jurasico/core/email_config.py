@@ -2,9 +2,9 @@ import os
 import random
 import string
 from pydantic_settings import BaseSettings
-from fastapi_mail import ConnectionConfig, FastMail
-
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from dotenv import load_dotenv
+from typing import List
 
 load_dotenv()
 
@@ -45,14 +45,10 @@ fm = FastMail(conf)
 
 
 def generate_verification_code(length: int = 6) -> str:
-    """Genera un código de verificación numérico simple."""
     return "".join(random.choices(string.digits, k=length))
 
 
 def create_jurassic_park_email_template(code: str, nombre_usuario: str) -> str:
-    """
-    Genera un HTML simple pero temático para el correo de bienvenida.
-    """
     return f"""
     <html lang="es">
     <head>
@@ -77,7 +73,7 @@ def create_jurassic_park_email_template(code: str, nombre_usuario: str) -> str:
                 overflow: hidden;
             }}
             .header {{
-                background-color: #c0392b; /* Rojo oscuro temático */
+                background-color: #c0392b;
                 color: #ffffff;
                 padding: 20px;
                 text-align: center;
@@ -144,3 +140,48 @@ def create_jurassic_park_email_template(code: str, nombre_usuario: str) -> str:
     </body>
     </html>
     """
+
+
+async def enviar_correos_publicidad(destinatarios: List[str], asunto: str, cuerpo: str):
+    html_content = f"""
+    <html>
+    <head>
+        <style>
+            .container {{ width: 90%; max-width: 600px; margin: 20px auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }}
+            .header {{ background-color: #c0392b; color: #ffffff; padding: 20px; text-align: center; }}
+            .content {{ padding: 30px; font-family: Arial, sans-serif; color: #333; }}
+            .footer {{ background-color: #333; color: #aaa; padding: 20px; text-align: center; font-size: 12px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>{asunto}</h1>
+            </div>
+            <div class="content">
+                <p>{cuerpo}</p>
+                <br>
+                <p>Gracias por ser parte de la comunidad de Jurassic Park.</p>
+                <p><small>Si no deseas recibir más publicidad, puedes configurar tus preferencias en tu perfil.</small></p>
+            </div>
+            <div class="footer">
+                <p>&copy; 2024 InGen Corporation. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    for email_to in destinatarios:
+        message = MessageSchema(
+            subject=asunto,
+            recipients=[email_to],
+            body=html_content,
+            subtype=MessageType.html
+        )
+
+        try:
+            await fm.send_message(message)
+            print(f"Correo de publicidad enviado a {email_to}")
+        except Exception as e:
+            print(f"Error al enviar correo de publicidad a {email_to}: {e}")
