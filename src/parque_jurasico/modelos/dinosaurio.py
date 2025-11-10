@@ -1,9 +1,43 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func, Text, JSON
+from sqlalchemy.orm import relationship, declarative_base
 from src.parque_jurasico.bd.BaseDatos import Base
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, Dict, Any, List
+
+
+# Heredan de 'Base'
+
+class Dinosaurio(Base):
+    __tablename__ = "dinosaurios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    dino_id_str = Column(String, unique=True, index=True, nullable=False)
+    nombre = Column(String, nullable=False)
+    especie = Column(String, nullable=False)
+    dieta = Column(String, nullable=False)
+    descripcion = Column(Text, nullable=True)
+
+    sprite_base_path = Column(String, nullable=True)
+
+    animations = Column(JSON, nullable=True)
+
+
+class Recinto(Base):
+    __tablename__ = "recintos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, nullable=False, unique=True)
+
+    # Coordenadas del mapa
+    x = Column(Integer, nullable=False)
+    y = Column(Integer, nullable=False)
+    r = Column(Integer, nullable=False, default=8)
+
+    dino_id_str = Column(String, ForeignKey("dinosaurios.dino_id_str"), nullable=True)
+
+    dinosaurio = relationship("Dinosaurio")
+
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -34,47 +68,6 @@ class EmailVerificationToken(Base):
     def is_expired(self):
         return datetime.now(timezone.utc) > self.expires_at
 
-class UsuarioAuth(BaseModel):
-    username: str
-    role: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    must_change_password: bool
-
-class UserCreate(BaseModel):
-    username: EmailStr
-    nombre: str
-    apellidos: str
-    password: str
-    acepta_publicidad: bool = False
-
-class Dinosaurio(BaseModel):
-    id: Optional[str] = None
-    nombre: str
-    especie: str
-    dieta: str
-
-    class Config:
-        orm_mode = True
-        from_attributes = True
-
-
-class Recinto(BaseModel):
-    id: Optional[str] = None
-    nombre: str
-    zona: str
-    estado: str
-    nivel_peligro: int
-
-    class Config:
-        orm_mode = True
-        from_attributes = True
-
-class DisenoParque(BaseModel):
-    zonas: list
-    recintos: list
 
 class HistorialEnviosPubli(Base):
     __tablename__ = "historial_envios_publi"
@@ -83,3 +76,54 @@ class HistorialEnviosPubli(Base):
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     admin_username = Column(String, nullable=False)
     destinatarios_count = Column(Integer, nullable=False)
+
+
+
+class UsuarioAuth(BaseModel):
+    username: str
+    role: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    must_change_password: bool
+
+
+class UserCreate(BaseModel):
+    username: EmailStr
+    nombre: str
+    apellidos: str
+    password: str
+    acepta_publicidad: bool = False
+
+
+class DinosaurioSchema(BaseModel):
+    id: Optional[int] = None
+    dino_id_str: str
+    nombre: str
+    especie: str
+    dieta: str
+    descripcion: Optional[str] = None
+    sprite_base_path: Optional[str] = None
+    animations: Optional[Dict[str, Any]] = None
+
+    class Config:
+        from_attributes = True
+
+
+class RecintoSchema(BaseModel):
+    id: Optional[int] = None
+    nombre: str
+    x: int
+    y: int
+    r: int
+    dino_id_str: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class DisenoParque(BaseModel):
+    zonas: list
+    recintos: List[RecintoSchema]

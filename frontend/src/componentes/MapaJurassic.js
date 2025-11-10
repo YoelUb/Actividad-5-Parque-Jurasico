@@ -147,7 +147,7 @@ const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick }) => {
                             onHover={handlePointHover}
                             onSalirClick={onSalirClick}
                             onDinoSelect={onDinoSelect}
-                            onHelipuertoClick={onHelipuertoClick} // <-- 4. PASAR LA PROP
+                            onHelipuertoClick={onHelipuertoClick}
                         />
                     ))}
 

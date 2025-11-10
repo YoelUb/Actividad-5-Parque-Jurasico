@@ -69,7 +69,7 @@ async def login_para_token(
 
 
 @router.get("/me", response_model=modelos.UsuarioAuth)
-async def leer_usuario_actual(usuario_actual: models.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
+async def leer_usuario_actual(usuario_actual: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
     return usuario_actual
 
 
