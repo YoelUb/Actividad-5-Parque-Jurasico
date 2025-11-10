@@ -2,25 +2,28 @@ import os
 import random
 import string
 from pydantic_settings import BaseSettings
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from fastapi_mail import ConnectionConfig
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class EmailSettings(BaseSettings):
-    """
-    Carga la configuración de email desde el archivo .env
-    """
-    MAIL_USERNAME: str
-    MAIL_PASSWORD: str
-    MAIL_FROM: str
-    # --------------------
-
-    MAIL_PORT: int = 587
-    MAIL_SERVER: str = "smtp.gmail.com"
-    MAIL_STARTTLS: bool = True
-    MAIL_SSL_TLS: bool = False
+    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "default_user")
+    MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD", "default_pass")
+    MAIL_FROM: str = os.getenv("MAIL_FROM", "default@example.com")
+    MAIL_PORT: int = int(os.getenv("MAIL_PORT", 587))
+    MAIL_SERVER: str = os.getenv("MAIL_SERVER", "smtp.example.com")
+    MAIL_FROM_NAME: str = os.getenv("MAIL_FROM_NAME", "Jurassic Park")
+    MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS", "True").lower() == "true"
+    MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS", "False").lower() == "true"
+    USE_CREDENTIALS: bool = os.getenv("USE_CREDENTIALS", "True").lower() == "true"
+    VALIDATE_CERTS: bool = os.getenv("VALIDATE_CERTS", "True").lower() == "true"
 
     class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+        # Aquí está la corrección:
+        extra = 'ignore'
 
 
 settings = EmailSettings()
@@ -31,26 +34,25 @@ conf = ConnectionConfig(
     MAIL_FROM=settings.MAIL_FROM,
     MAIL_PORT=settings.MAIL_PORT,
     MAIL_SERVER=settings.MAIL_SERVER,
+    MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
     MAIL_STARTTLS=settings.MAIL_STARTTLS,
     MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-    USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True
+    USE_CREDENTIALS=settings.USE_CREDENTIALS,
+    VALIDATE_CERTS=settings.VALIDATE_CERTS,
+    TEMPLATE_FOLDER='./src/parque_jurasico/templates/email'
 )
-
-fm = FastMail(conf)
 
 
 def generate_verification_code(length: int = 6) -> str:
-    """Genera un código numérico aleatorio de 6 dígitos."""
+    """Genera un código de verificación numérico simple."""
     return "".join(random.choices(string.digits, k=length))
 
 
-def create_jurassic_park_email_template(code: str, nombre: str) -> str:
+def create_jurassic_park_email_template(code: str, nombre_usuario: str) -> str:
     """
-    Crea la plantilla HTML temática de Jurassic Park.
+    Genera un HTML simple pero temático para el correo de bienvenida.
     """
     return f"""
-    <!DOCTYPE html>
     <html lang="es">
     <head>
         <meta charset="UTF-8">
@@ -58,9 +60,9 @@ def create_jurassic_park_email_template(code: str, nombre: str) -> str:
         <title>Verificación de Cuenta - Jurassic Park</title>
         <style>
             body {{
-                font-family: 'Arial', sans-serif;
-                background-color: #1a1a1a;
-                color: #e0e0e0;
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                background-color: #f4f4f4;
                 margin: 0;
                 padding: 0;
             }}
@@ -68,48 +70,47 @@ def create_jurassic_park_email_template(code: str, nombre: str) -> str:
                 width: 90%;
                 max-width: 600px;
                 margin: 20px auto;
-                background-color: #2a2a2a;
-                border: 2px solid #ff4136; /* Rojo JP */
+                background-color: #ffffff;
+                border: 1px solid #ddd;
                 border-radius: 8px;
                 overflow: hidden;
             }}
             .header {{
-                background-color: #111;
+                background-color: #c0392b; /* Rojo oscuro temático */
+                color: #ffffff;
                 padding: 20px;
                 text-align: center;
-                border-bottom: 2px solid #ff4136;
             }}
             .header h1 {{
-                color: #ff4136;
                 margin: 0;
-                font-size: 28px;
+                font-size: 24px;
             }}
             .content {{
                 padding: 30px;
-                line-height: 1.6;
             }}
             .content p {{
                 font-size: 16px;
+                color: #333;
             }}
             .code-box {{
-                background-color: #1a1a1a;
-                border: 1px dashed #e0a000; /* Ámbar JP */
-                color: #ffffff;
-                font-size: 36px;
-                font-weight: bold;
-                text-align: center;
+                background-color: #eeeeee;
+                border: 1px dashed #ccc;
                 padding: 20px;
-                border-radius: 5px;
-                letter-spacing: 5px;
-                margin: 25px 0;
+                text-align: center;
+                margin: 20px 0;
+            }}
+            .code {{
+                font-size: 32px;
+                font-weight: bold;
+                color: #c0392b;
+                letter-spacing: 4px;
             }}
             .footer {{
-                background-color: #111;
-                color: #888;
+                background-color: #333;
+                color: #aaa;
                 padding: 20px;
                 text-align: center;
                 font-size: 12px;
-                border-top: 1px solid #444;
             }}
             .footer p {{
                 margin: 5px 0;
@@ -119,22 +120,24 @@ def create_jurassic_park_email_template(code: str, nombre: str) -> str:
     <body>
         <div class="container">
             <div class="header">
-                <h1>JURASSIC PARK</h1>
+                <h1>¡Bienvenido a Jurassic Park!</h1>
             </div>
             <div class="content">
-                <p>Hola, {nombre},</p>
-                <p>¡Bienvenido a Jurassic Park! Para activar tu cuenta de visitante de InGen, por favor usa el siguiente código de verificación. No hemos reparado en gastos.</p>
+                <p>Hola, {nombre_usuario},</p>
+                <p>Estás a un paso de completar tu registro. Por favor, usa el siguiente código de verificación para activar tu cuenta. El código expirará en 20 minutos.</p>
 
                 <div class="code-box">
-                    {code}
+                    <p style="margin-bottom: 10px;">Tu código de verificación es:</p>
+                    <div class="code">{code}</div>
                 </div>
 
-                <p>Este código de acceso expirará en <strong>20 minutos</strong>. Si no has solicitado este registro, por favor, informa a seguridad del parque.</p>
-                <p>Atentamente,<br>El Equipo de Administración del Parque</p>
+                <p>Si no intentaste registrarte en nuestra web, por favor ignora este correo.</p>
+                <p>¡Esperamos verte pronto en la isla!</p>
+                <p><strong>— El Equipo de InGen</strong></p>
             </div>
             <div class="footer">
-                <p>&copy; InGen Corporation. Todos los derechos reservados.</p>
-                <p>La seguridad es una ilusión. La vida se abre camino.</p>
+                <p>&copy; 2024 InGen Corporation. Todos los derechos reservados.</p>
+                <p>Isla Nublar</p>
             </div>
         </div>
     </body>

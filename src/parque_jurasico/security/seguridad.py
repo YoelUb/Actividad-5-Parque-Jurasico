@@ -16,6 +16,8 @@ CLAVE_SECRETA = os.getenv("SECRET_KEY", "una_clave_secreta_por_defecto_muy_segur
 ALGORITMO = "HS256"
 MINUTOS_EXPIRACION_TOKEN = 30
 
+contexto_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 oauth2_esquema = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 def crear_token_acceso(data: Dict[str, Any], expires_delta: Optional[timedelta] = None):
@@ -34,12 +36,7 @@ def verificar_contrasena(contrasena_plana, contrasena_hasheada):
 def hashear_contrasena(contrasena_plana: str) -> str:
     return contexto_pwd.hash(contrasena_plana)
 
-# --- 2. NUEVA FUNCIÓN DE VALIDACIÓN REX ---
 def validar_contrasena_rex(password: str) -> bool:
-    """
-    Valida la complejidad de la contraseña usando Regex (Fuerza T-Rex).
-    Política: 8+ chars, 1 mayúscula, 1 minúscula, 1 número, 1 símbolo.
-    """
     if len(password) < 8:
         return False
     if not re.search(r"[A-Z]", password):
@@ -51,10 +48,8 @@ def validar_contrasena_rex(password: str) -> bool:
     if not re.search(r"[!@#$%^&*()]", password):
         return False
     return True
-# -------------------------------------------
 
 async def get_user_by_username(db: AsyncSession, username: str) -> Optional[UsuarioDBModel]:
-    """Obtiene un usuario de la BD por su username (email)."""
     result = await db.execute(
         select(UsuarioDBModel).where(UsuarioDBModel.username == username)
     )
