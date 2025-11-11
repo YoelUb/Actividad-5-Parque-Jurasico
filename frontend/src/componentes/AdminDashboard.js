@@ -1,19 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
-import MapaJurassic from './MapaJurassic';
 import ModalConfirmacion from './ModalConfirmacion';
 
 const AdminDashboard = ({ onSalirClick }) => {
     const [users, setUsers] = useState([]);
-    const [dinosaurios, setDinosaurios] = useState([]);
-    const [newDino, setNewDino] = useState({
-        nombre: '',
-        especie: '',
-        dieta: '',
-        latitud: 0,
-        longitud: 0,
-    });
+    const [logs, setLogs] = useState([]);
     const [error, setError] = useState('');
 
     const [promoModalAbierto, setPromoModalAbierto] = useState(false);
@@ -22,6 +14,12 @@ const AdminDashboard = ({ onSalirClick }) => {
         message: '',
         error: false,
     });
+
+    const [jeepColor, setJeepColor] = useState('Green');
+    const [carnivoreDino, setCarnivoreDino] = useState('RedDino');
+    const [herbivoreDino, setHerbivoreDino] = useState('BlueDino');
+    const [aviaryDino, setAviaryDino] = useState('YellowDino');
+    const [aquaDino, setAquaDino] = useState('DarkGreenDino');
 
     const token = localStorage.getItem('jurassic_token');
 
@@ -32,17 +30,40 @@ const AdminDashboard = ({ onSalirClick }) => {
         [token]
     );
 
+    const dinoOptions = [
+        { value: 'RedDino', label: 'T-Rex (Rojo)', path: '/RedDino/RedDinosaur1.png' },
+        { value: 'BlueDino', label: 'Raptor (Azul)', path: '/BlueDino/BlueDinosaur1.png' },
+        { value: 'YellowDino', label: 'Dino (Amarillo)', path: '/yellowDino/YellowDinosaur1.png' },
+        { value: 'DarkGreenDino', label: 'Dino (Verde Osc.)', path: '/DarkGreenDino/DarkGreenDinosaur1.png' },
+        { value: 'liteGreenDino', label: 'Dino (Verde Cla.)', path: '/liteGreenDino/LightGreenDinosaur1.png' },
+    ];
+
+    const jeepOptions = [
+        { value: 'Green', label: 'Jeep Verde', path: '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_000.png' },
+        { value: 'Brown', label: 'Jeep Marrón', path: '/Jeep/Jeep_Brown/MOVE/SOUTH/SEPARATED/Brown_JEEP_CLEAN_SOUTH_000.png' },
+        { value: 'Black', label: 'Jeep Negro', path: '/Jeep/Jeep_Black/MOVE/SOUTH/SEPARATED/Black_JEEP_CLEAN_SOUTH_000.png' },
+    ];
+
+    const getPreviewPath = (options, value) => {
+        const selected = options.find(opt => opt.value === value);
+        return selected ? selected.path : '';
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-
                 setUsers([
-                    { id: 1, username: 'AlanGrant', is_admin: true },
-                    { id: 2, username: 'EllieSattler', is_admin: false },
+                    { id: 1, username: 'AlanGrant@jp.com', role: 'admin', is_active: true },
+                    { id: 2, username: 'EllieSattler@jp.com', role: 'admin', is_active: true },
+                    { id: 3, username: 'IanMalcolm@jp.com', role: 'visitante', is_active: true },
+                    { id: 4, username: 'JohnHammond@jp.com', role: 'visitante', is_active: false },
                 ]);
-                setDinosaurios([
-                    { id: 1, nombre: 'Rexy', especie: 'T-Rex', latitud: 10.45, longitud: -84.12 },
-                    { id: 2, nombre: 'Blue', especie: 'Velociraptor', latitud: 10.48, longitud: -84.09 },
+
+                setLogs([
+                  { id: 1, timestamp: '2025-11-10 14:30:12', user: 'AlanGrant@jp.com', action: 'Envió correo de marketing' },
+                  { id: 2, timestamp: '2025-11-10 10:05:01', user: 'IanMalcolm@jp.com', action: 'Inició sesión' },
+                  { id: 3, timestamp: '2025-11-09 18:22:45', user: 'EllieSattler@jp.com', action: 'Forzó cambio de contraseña a JohnHammond@jp.com' },
+                  { id: 4, timestamp: '2025-11-09 15:12:00', user: 'IanMalcolm@jp.com', action: 'Accedió al Laboratorio' },
                 ]);
 
                 setError('');
@@ -58,25 +79,6 @@ const AdminDashboard = ({ onSalirClick }) => {
             setError('No se encontró un token válido. Inicia sesión nuevamente.');
         }
     }, [token, authHeaders]);
-
-    const handleDinoSubmit = async (e) => {
-        e.preventDefault();
-        try {
-
-            const nuevoId = dinosaurios.length + 1;
-            setDinosaurios([...dinosaurios, { ...newDino, id: nuevoId }]);
-            setNewDino({ nombre: '', especie: '', dieta: '', latitud: 0, longitud: 0 });
-            setError('');
-        } catch (err) {
-            console.error(err);
-            setError('Error al crear el dinosaurio.');
-        }
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewDino({ ...newDino, [name]: value });
-    };
 
     const handleSendPromoEmail = async () => {
         setPromoModalAbierto(false);
@@ -95,111 +97,144 @@ const AdminDashboard = ({ onSalirClick }) => {
         }
     };
 
+    const handleAssetSave = () => {
+        console.log("Guardando configuración de assets:");
+        console.log({
+            jeep: jeepColor,
+            carnivoro: carnivoreDino,
+            herbivoro: herbivoreDino,
+            aviario: aviaryDino,
+            acuario: aquaDino,
+        });
+    };
+
     return (
         <div className="admin-dashboard">
-            <h2>Panel de Administración del Parque</h2>
+            <div className="admin-header">
+                <h2>Panel de Administración del Parque</h2>
+                <button onClick={onSalirClick} className="admin-logout-btn">Salir</button>
+            </div>
+
             {error && <p className="error-message">{error}</p>}
 
-            <div className="dashboard-section">
-                <h3>Mapa de Recintos</h3>
-                <MapaJurassic onSalirClick={onSalirClick} />
-            </div>
+            <div className="admin-grid">
 
-            <div className="dashboard-section">
-                <h3>Marketing (UAX)</h3>
-                <p>Enviar correo promocional a todos los usuarios activos que aceptaron publicidad.</p>
-                <button
-                    onClick={() => setPromoModalAbierto(true)}
-                    disabled={emailStatus.loading}
-                    className="promo-button"
-                >
-                    {emailStatus.loading ? 'Enviando...' : 'Enviar Correo Promocional Semanal'}
-                </button>
-                {emailStatus.message && (
-                    <p className={emailStatus.error ? 'error-message' : 'success-message'}>
-                        {emailStatus.message}
-                    </p>
-                )}
-            </div>
+                <div className="dashboard-section terminal-list">
+                    <h3>Usuarios Registrados</h3>
+                    <div className="admin-list-container">
+                        <ul className="admin-list">
+                            {users.map((user) => (
+                                <li key={user.id}>
+                                    <span>{user.username}</span>
+                                    <span className={user.is_active ? 'status-active' : 'status-inactive'}>
+                                        {user.is_active ? 'ACTIVO' : 'INACTIVO'}
+                                    </span>
+                                    <span className="role-tag">{user.role}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
 
-            <div className="dashboard-section-flex">
-                <div className="dashboard-section">
-                    <h3>Añadir Nuevo Dinosaurio</h3>
-                    <form onSubmit={handleDinoSubmit} className="dino-form">
-                        <input
-                            type="text"
-                            name="nombre"
-                            value={newDino.nombre}
-                            onChange={handleInputChange}
-                            placeholder="Nombre (Ej: Rexy)"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="especie"
-                            value={newDino.especie}
-                            onChange={handleInputChange}
-                            placeholder="Especie (Ej: T-Rex)"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="dieta"
-                            value={newDino.dieta}
-                            onChange={handleInputChange}
-                            placeholder="Dieta (Ej: Carnívoro)"
-                            required
-                        />
-                        <input
-                            type="number"
-                            name="latitud"
-                            value={newDino.latitud}
-                            onChange={handleInputChange}
-                            placeholder="Latitud (Ej: 10.45)"
-                            step="any"
-                            required
-                        />
-                        <input
-                            type="number"
-                            name="longitud"
-                            value={newDino.longitud}
-                            onChange={handleInputChange}
-                            placeholder="Longitud (Ej: -84.12)"
-                            step="any"
-                            required
-                        />
-                        <button type="submit">Añadir Dinosaurio</button>
-                    </form>
+                <div className="dashboard-section terminal-list">
+                    <h3>Historial de Actividad (Logs)</h3>
+                    <div className="admin-list-container">
+                        <ul className="admin-list log-list">
+                            {logs.map((log) => (
+                                <li key={log.id}>
+                                    <span>[{log.timestamp}]</span>
+                                    <span className="log-user">{log.user}:</span>
+                                    <span>{log.action}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="dashboard-section asset-config-section">
+                    <h3>Configuración de Assets</h3>
+                    <div className="asset-config-grid">
+
+                        <div className="asset-selector">
+                            <label>Transporte (Coche)</label>
+                            <img src={getPreviewPath(jeepOptions, jeepColor)} alt="Jeep" className="asset-preview" />
+                            <select value={jeepColor} onChange={(e) => setJeepColor(e.target.value)}>
+                                {jeepOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="asset-selector">
+                            <label>Recinto Carnívoros</label>
+                            <img src={getPreviewPath(dinoOptions, carnivoreDino)} alt="Dino" className="asset-preview" />
+                            <select value={carnivoreDino} onChange={(e) => setCarnivoreDino(e.target.value)}>
+                                {dinoOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="asset-selector">
+                            <label>Recinto Herbívoros</label>
+                            <img src={getPreviewPath(dinoOptions, herbivoreDino)} alt="Dino" className="asset-preview" />
+                            <select value={herbivoreDino} onChange={(e) => setHerbivoreDino(e.target.value)}>
+                                {dinoOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="asset-selector">
+                            <label>Recinto Aviario</label>
+                            <img src={getPreviewPath(dinoOptions, aviaryDino)} alt="Dino" className="asset-preview" />
+                            <select value={aviaryDino} onChange={(e) => setAviaryDino(e.target.value)}>
+                                {dinoOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="asset-selector">
+                            <label>Recinto Acuario</label>
+                            <img src={getPreviewPath(dinoOptions, aquaDino)} alt="Dino" className="asset-preview" />
+                            <select value={aquaDino} onChange={(e) => setAquaDino(e.target.value)}>
+                                {dinoOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                    </div>
+                    <button onClick={handleAssetSave} className="promo-button save-assets-btn">
+                        Guardar Cambios de Assets
+                    </button>
                 </div>
 
                 <div className="dashboard-section">
-                    <h3>Dinosaurios en la Base de Datos</h3>
-                    <ul className="data-list">
-                        {dinosaurios.map((dino) => (
-                            <li key={dino.id}>
-                                {dino.nombre} ({dino.especie}) - Coords: [{dino.latitud}, {dino.longitud}]
-                            </li>
-                        ))}
-                    </ul>
+                    <h3>Marketing (UAX)</h3>
+                    <p>Enviar correo promocional a todos los usuarios activos.</p>
+                    <button
+                        onClick={() => setPromoModalAbierto(true)}
+                        disabled={emailStatus.loading}
+                        className="promo-button"
+                    >
+                        {emailStatus.loading ? 'Enviando...' : 'Enviar Correo Promocional'}
+                    </button>
+                    {emailStatus.message && (
+                        <p className={emailStatus.error ? 'error-message' : 'success-message'}>
+                            {emailStatus.message}
+                        </p>
+                    )}
                 </div>
-            </div>
 
-            <div className="dashboard-section">
-                <h3>Usuarios Registrados</h3>
-                <ul className="data-list">
-                    {users.map((user) => (
-                        <li key={user.id}>
-                            {user.username} {user.is_admin ? <strong>(Admin)</strong> : '(Usuario)'}
-                        </li>
-                    ))}
-                </ul>
             </div>
 
             <ModalConfirmacion
                 isOpen={promoModalAbierto}
                 onClose={() => setPromoModalAbierto(false)}
                 onConfirm={handleSendPromoEmail}
-                message="¿Confirmas el envío del correo promocional a todos los usuarios válidos? (Límite: 1 vez por semana)"
+                message="¿Confirmas el envío del correo promocional a todos los usuarios válidos?"
             />
         </div>
     );

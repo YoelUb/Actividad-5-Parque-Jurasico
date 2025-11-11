@@ -1,179 +1,222 @@
 .admin-dashboard {
-  width: 100%;
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 25px;
-  background: linear-gradient(180deg, #0a0f14 0%, #101820 100%);
-  border-radius: 12px;
-  color: #e0f7ff;
-  box-shadow: 0 0 25px rgba(0, 200, 255, 0.15), inset 0 0 40px rgba(0, 180, 255, 0.05);
-  border: 1px solid rgba(0, 200, 255, 0.2);
-  font-family: 'Orbitron', 'Rajdhani', 'Segoe UI', sans-serif;
-  position: relative;
-  overflow: hidden;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #1a1a1a;
+    color: #f5f5f5;
 }
 
-.admin-dashboard::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  background: linear-gradient(120deg, rgba(0, 180, 255, 0.3), rgba(0, 80, 150, 0.2), transparent 70%);
-  filter: blur(15px);
-  z-index: 0;
-  animation: panelGlow 6s infinite alternate ease-in-out;
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ff4136;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
 }
 
-@keyframes panelGlow {
-  from {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0.7;
-    transform: scale(1.02);
-  }
+.admin-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ff4136;
+    margin: 0;
 }
 
-.admin-dashboard * {
-  position: relative;
-  z-index: 1;
+.admin-logout-btn {
+    background-color: #ff4136;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-.admin-dashboard h2 {
-  text-align: center;
-  color: #00baff;
-  margin-bottom: 40px;
-  font-size: 2.5rem;
-  letter-spacing: 2px;
-  text-shadow: 0 0 25px rgba(0, 200, 255, 0.6);
+.admin-logout-btn:hover {
+    background-color: #e03024;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
 }
 
 .dashboard-section {
-  background: rgba(10, 25, 35, 0.85);
-  padding: 25px;
-  border-radius: 10px;
-  margin-bottom: 25px;
-  border: 1px solid rgba(0, 180, 255, 0.2);
-  box-shadow: inset 0 0 15px rgba(0, 180, 255, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.dashboard-section:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 0 25px rgba(0, 200, 255, 0.2);
+    background-color: #242424;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 20px;
 }
 
 .dashboard-section h3 {
-  color: #00baff;
-  border-bottom: 2px solid rgba(0, 180, 255, 0.6);
-  padding-bottom: 10px;
-  margin-top: 0;
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(0, 180, 255, 0.4);
+    font-size: 1.5rem;
+    color: #f0e68c;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
 }
 
-.dashboard-section-flex {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+.dashboard-section p {
+    font-size: 0.95rem;
+    color: #ccc;
+    line-height: 1.6;
 }
 
-.dashboard-section-flex > .dashboard-section {
-  flex: 1;
-  min-width: 280px;
-}
-
-.data-list {
-  list-style: none;
-  padding: 0;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.data-list li {
-  background: rgba(15, 40, 55, 0.8);
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 6px;
-  font-size: 0.95em;
-  color: #cdeeff;
-  border: 1px solid rgba(0, 180, 255, 0.15);
-  box-shadow: 0 0 10px rgba(0, 200, 255, 0.05);
-  transition: background 0.3s;
-}
-
-.data-list li:hover {
-  background: rgba(20, 70, 90, 0.9);
-}
-
-.dino-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.dino-form input {
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 180, 255, 0.3);
-  background-color: rgba(5, 20, 30, 0.8);
-  color: #e0f7ff;
-  font-size: 1em;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.dino-form input:focus {
-  outline: none;
-  border-color: #00baff;
-  box-shadow: 0 0 10px rgba(0, 200, 255, 0.4);
-}
-
-.dino-form button,
 .promo-button {
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #00baff, #2cc0ff);
-  color: #001020;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1.1rem;
-  letter-spacing: 1px;
-  box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
-  transition: all 0.3s ease;
+    background-color: #f0e68c;
+    color: #1a1a1a;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 100%;
 }
 
-.dino-form button:hover,
 .promo-button:hover {
-  background: linear-gradient(90deg, #2cc0ff, #aee0ff);
-  box-shadow: 0 0 40px rgba(0, 225, 255, 0.8);
-  transform: scale(1.05);
+    background-color: #e0d57a;
 }
 
 .promo-button:disabled {
-  background: #333;
-  color: #777;
-  box-shadow: none;
-  cursor: not-allowed;
+    background-color: #555;
+    color: #999;
+    cursor: not-allowed;
 }
 
 .error-message {
-  color: #ff4b4b;
-  background-color: rgba(60, 15, 15, 0.8);
-  border: 1px solid rgba(255, 80, 80, 0.5);
-  padding: 12px;
-  border-radius: 6px;
-  text-align: center;
-  box-shadow: 0 0 15px rgba(255, 50, 50, 0.2);
+    color: #ff4136;
+    background-color: rgba(255, 65, 54, 0.1);
+    border: 1px solid #ff4136;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 15px;
 }
 
 .success-message {
-  color: #00ffae;
-  background-color: rgba(10, 35, 25, 0.8);
-  border: 1px solid rgba(0, 255, 170, 0.5);
-  padding: 12px;
-  border-radius: 6px;
-  text-align: center;
-  box-shadow: 0 0 15px rgba(0, 255, 170, 0.2);
+    color: #2ecc40;
+    background-color: rgba(46, 204, 64, 0.1);
+    border: 1px solid #2ecc40;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.terminal-list h3 {
+    color: #2ecc40;
+}
+
+.admin-list-container {
+    background-color: #000;
+    border: 1px solid #2ecc40;
+    border-radius: 5px;
+    padding: 15px;
+    height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.admin-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 5px;
+    border-bottom: 1px dashed #333;
+}
+
+.admin-list li:last-child {
+    border-bottom: none;
+}
+
+.admin-list .status-active {
+    color: #2ecc40;
+    font-weight: 700;
+}
+.admin-list .status-inactive {
+    color: #ff4136;
+    font-weight: 700;
+}
+.admin-list .role-tag {
+    background-color: #f0e68c;
+    color: #1a1a1a;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.log-list span {
+    color: #ccc;
+}
+.log-list .log-user {
+    color: #f0e68c;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+.asset-config-section h3 {
+    color: #f0e68c;
+}
+
+.asset-config-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.asset-selector {
+    display: grid;
+    grid-template-columns: 1fr 64px 2fr;
+    align-items: center;
+    gap: 15px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.asset-selector label {
+    font-weight: 700;
+    color: #f5f5f5;
+}
+
+.asset-preview {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    background-color: #1a1a1a;
+    border-radius: 5px;
+    border: 1px solid #555;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.asset-selector select {
+    background-color: #f5f5f5;
+    color: #1a1a1a;
+    border: 2px solid #f0e68c;
+    border-radius: 5px;
+    padding: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.save-assets-btn {
+    background-color: #2ecc40;
+    color: #1a1a1a;
+}
+
+.save-assets-btn:hover {
+    background-color: #28b838;
 }
