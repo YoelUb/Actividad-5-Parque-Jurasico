@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import './LabModal.css';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const FRAME_PATHS = [
+  '/helicoptero/separated_frames/helicopter_1.png',
+  '/helicoptero/separated_frames/helicopter_2.png',
+  '/helicoptero/separated_frames/helicopter_3.png',
+  '/helicoptero/separated_frames/helicopter_4.png',
+  '/helicoptero/separated_frames/helicopter_5.png',
+  '/helicoptero/separated_frames/helicopter_6.png',
+  '/helicoptero/separated_frames/helicopter_7.png',
+  '/helicoptero/separated_frames/helicopter_8.png',
+];
+
+const roarSound = new Audio('/rugido.mp3');
 
 const traducciones = {
     'idle': 'Parado',
@@ -18,7 +32,6 @@ const traducciones = {
     'walk': 'Andar'
 };
 
-
 const animacionesDisponibles = [
     { id: 'idle', nombre: traducciones['idle'] },
     { id: 'bite', nombre: traducciones['bite'] },
@@ -31,73 +44,110 @@ const animacionesDisponibles = [
     { id: 'walk', nombre: traducciones['walk'] }
 ];
 
-function LabModal({ isOpen, phase, onClose }) {
-    // Estado para saber qué animación de raptor mostrar (usamos el ID 'idle')
-    const [animacion, setAnimacion] = useState('idle');
+const LabModal = ({ isOpen, phase, onClose }) => {
+  const [animacion, setAnimacion] = useState('idle');
+  const [frame, setFrame] = useState(0);
 
-    // Cada vez que el modal se abre o la fase cambia a 'lab',
-    // reseteamos la animación a 'idle' (parado)
-    useEffect(() => {
-        if (isOpen && phase === 'lab') {
-            setAnimacion('idle');
-        }
-    }, [isOpen, phase]);
+  useEffect(() => {
+    if (isOpen && phase === 'lab') {
+      setAnimacion('idle');
+    }
+  }, [isOpen, phase]);
 
-    if (!isOpen) return null;
+  useEffect(() => {
+    if (phase !== 'helicopter' || !isOpen) return;
 
-    // --- Renderizado de la FASE 1: Helicóptero ---
-    const renderHelicoptero = () => (
-        <div className="lab-content-inner">
-            <img src="/helicoptero.png" alt="Helicóptero" className="helicoptero-img" />
-            <p className="cargando-texto">Volando al laboratorio...</p>
+    const intervalId = setInterval(() => {
+      setFrame(prevFrame => (prevFrame + 1) % FRAME_PATHS.length);
+    }, 80);
+
+    return () => clearInterval(intervalId);
+  }, [phase, isOpen]);
+
+  useEffect(() => {
+    if (animacion === 'roar' && isOpen && phase === 'lab') {
+      roarSound.play();
+    }
+  }, [animacion, isOpen, phase]);
+
+  const renderContent = () => {
+    if (phase === 'helicopter') {
+      return (
+        <div className="lab-modal-helicopter-phase">
+          <motion.img
+            src={FRAME_PATHS[frame]}
+            alt="Volando..."
+            className="helicopter-sprite"
+            initial={{ x: '-100%', y: '100%' }}
+            animate={{ x: '100%', y: '-100%' }}
+            transition={{ duration: 3, ease: 'linear' }}
+          />
+          <p className="cargando-texto-lab">Volando al laboratorio...</p>
         </div>
-    );
+      );
+    }
 
-    // --- Renderizado de la FASE 2: Laboratorio ---
-    const renderLaboratorio = () => (
-        <div className="lab-content-inner">
-            <h3>Laboratorio de Velociraptors</h3>
-            <div className="sprite-container">
-                <img
-                    // El GIF se carga dinámicamente según el estado 'animacion' (el ID)
-                    src={`/laboratorio/gif/2x/raptor-${animacion}.gif`}
-                    alt={`Raptor ${animacion}`}
-                    className="raptor-sprite"
-                    // 'key' fuerza a React a recargar el GIF cada vez que cambia la animación
-                    key={animacion}
-                />
-            </div>
+    if (phase === 'lab') {
+      return (
+        <motion.div
+          className="lab-modal-lab-phase"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h3>Laboratorio de Velociraptors</h3>
+          <div className="sprite-container">
+            <img
+              src={`/laboratorio/gif/2x/raptor-${animacion}.gif`}
+              alt={`Raptor ${animacion}`}
+              className="raptor-sprite"
+              key={animacion}
+            />
+          </div>
+          <div className="controles-animacion">
+            {animacionesDisponibles.map((anim) => (
+              <button
+                key={anim.id}
+                onClick={() => setAnimacion(anim.id)}
+                className="control-boton"
+              >
+                {anim.nombre}
+              </button>
+            ))}
+          </div>
+          <button onClick={onClose} className="lab-modal-close-btn">
+            Salir del Laboratorio
+          </button>
+        </motion.div>
+      );
+    }
+    return null;
+  };
 
-            {/* El mapeo de botones ahora solo creará los que están en la lista filtrada */}
-            <div className="controles-animacion">
-                {animacionesDisponibles.map((anim) => (
-                    <button
-                        key={anim.id}
-                        onClick={() => setAnimacion(anim.id)} // Usamos el ID para cambiar el estado
-                        className="control-boton"
-                    >
-                        {anim.nombre} {/* Usamos el nombre en español para el texto */}
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-
-    return (
-        // El fondo oscuro que cierra el modal al hacer clic
-        <div className="modal-backdrop-lab" onClick={onClose}>
-            {/* El contenido del modal que EVITA que se cierre al hacer clic dentro */}
-            <div className="modal-content-lab" onClick={(e) => e.stopPropagation()}>
-
-                {/* Botón de cerrar (siempre visible en este modal) */}
-                <button onClick={onClose} className="close-button-lab">&times;</button>
-
-                {/* Renderizado Condicional: Muestra una fase u otra */}
-                {phase === 'helicopter' ? renderHelicoptero() : renderLaboratorio()}
-
-            </div>
-        </div>
-    );
-}
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="lab-modal-backdrop"
+          onClick={onClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="lab-modal-content"
+            initial={{ scale: 0.7 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.7 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button onClick={onClose} className="close-button-lab">&times;</button>
+            {renderContent()}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 export default LabModal;

@@ -97,7 +97,7 @@ function Aplicacion() {
     setLabModalAbierto(true);
     setTimeout(() => {
       setLabModalPhase('lab');
-    }, 2000);
+    }, 4000);
   };
 
   const handleCloseLabModal = () => {

@@ -63,7 +63,7 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
                     onSalirClick();
                 } else if (point.dinoId && onDinoSelect) {
                     onDinoSelect(point.dinoId);
-                } else if (point.name === "Helipuerto" && onHelipuertoClick) { // <-- AÑADIDO
+                } else if (point.name === "Helipuerto" && onHelipuertoClick) {
                     onHelipuertoClick();
                 } else {
                     console.log(`Clic en: ${point.name} (sin acción)`);
