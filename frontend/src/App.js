@@ -8,10 +8,22 @@ import MapaJurassic from './componentes/MapaJurassic';
 import ModalConfirmacion from './componentes/ModalConfirmacion';
 import DinoModal from './componentes/DinoModal';
 import LabModal from './componentes/LabModal';
+import JeepModal from './componentes/JeepModal';
 import IntroAnimacion from './componentes/IntroAnimacion';
 import './App.css';
 
 const API_URL = 'http://localhost:8000/api';
+
+const locations = [
+    {"name": "Recinto Carnívoros", "x": 236, "y": 290, "r": 8, "dinoId": "dino_001"},
+    {"name": "Recinto Herbívoros", "x": 334, "y": 374, "r": 8, "dinoId": "dino_004"},
+    {"name": "Recinto Aviario", "x": 500, "y": 438, "r": 8, "dinoId": "dino_003"},
+    {"name": "Puerta", "x": 857, "y": 620, "r": 8},
+    {"name": "Coche", "x": 608, "y": 658, "r": 8},
+    {"name": "Recinto Acuario", "x": 862, "y": 159, "r": 8, "dinoId": "dino_002"},
+    {"name": "Guardas", "x": 484, "y": 336, "r": 8},
+    {"name": "Helipuerto", "x": 575, "y": 175, "r": 8},
+];
 
 function Aplicacion() {
   const [token, setToken] = useState(localStorage.getItem('jurassic_token'));
@@ -22,6 +34,8 @@ function Aplicacion() {
   const [dinos, setDinos] = useState({});
   const [labModalAbierto, setLabModalAbierto] = useState(false);
   const [labModalPhase, setLabModalPhase] = useState('helicopter');
+  const [jeepModalAbierto, setJeepModalAbierto] = useState(false);
+  const [jeepModalPhase, setJeepModalPhase] = useState('lista');
   const [pantallaAuth, setPantallaAuth] = useState('login');
   const [tokenLimitado, setTokenLimitado] = useState(null);
   const [emailParaVerificar, setEmailParaVerificar] = useState(null);
@@ -104,6 +118,27 @@ function Aplicacion() {
     setLabModalAbierto(false);
   };
 
+  const handleCocheClick = () => {
+    setJeepModalPhase('lista');
+    setJeepModalAbierto(true);
+  };
+
+  const handleJeepRedirect = (location) => {
+    setJeepModalPhase('viaje');
+
+    setTimeout(() => {
+      setJeepModalAbierto(false);
+
+      if (location.dinoId) {
+        handleDinoSelect(location.dinoId);
+      } else if (location.name === 'Helipuerto') {
+        handleHelipuertoClick();
+      } else if (location.name === 'Puerta') {
+        iniciarCierreSesion();
+      }
+    }, 4000);
+  };
+
   const irARegistro = () => setPantallaAuth('register');
   const irALogin = () => {
     setPantallaAuth('login');
@@ -168,6 +203,7 @@ function Aplicacion() {
         onSalirClick={iniciarCierreSesion}
         onDinoSelect={handleDinoSelect}
         onHelipuertoClick={handleHelipuertoClick}
+        onCocheClick={handleCocheClick}
         token={token}
       />
     );
@@ -190,6 +226,14 @@ function Aplicacion() {
         isOpen={labModalAbierto}
         phase={labModalPhase}
         onClose={handleCloseLabModal}
+      />
+
+      <JeepModal
+        isOpen={jeepModalAbierto}
+        onClose={() => setJeepModalAbierto(false)}
+        phase={jeepModalPhase}
+        locations={locations}
+        onSelectLocation={handleJeepRedirect}
       />
     </div>
   );

@@ -21,7 +21,7 @@ const MapaImage = ({width, height}) => {
     return <Image image={image} width={width} height={height}/>;
 };
 
-const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, onHelipuertoClick}) => {
+const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, onHelipuertoClick, onCocheClick}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const scaleAvg = (scaleX + scaleY) / 2;
@@ -65,6 +65,8 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
                     onDinoSelect(point.dinoId);
                 } else if (point.name === "Helipuerto" && onHelipuertoClick) {
                     onHelipuertoClick();
+                } else if (point.name === "Coche" && onCocheClick) {
+                    onCocheClick();
                 } else {
                     console.log(`Clic en: ${point.name} (sin acción)`);
                 }
@@ -73,7 +75,7 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
     );
 };
 
-const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick }) => {
+const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick, onCocheClick }) => {
     const wrapperRef = useRef(null);
     const [size, setSize] = useState({width: ORIGINAL_WIDTH, height: ORIGINAL_HEIGHT});
     const [tooltip, setTooltip] = useState(null);
@@ -148,6 +150,7 @@ const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick }) => {
                             onSalirClick={onSalirClick}
                             onDinoSelect={onDinoSelect}
                             onHelipuertoClick={onHelipuertoClick}
+                            onCocheClick={onCocheClick}
                         />
                     ))}
 

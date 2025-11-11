@@ -1,0 +1,143 @@
+.jeep-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.jeep-modal-content {
+  background: #1e1e1e;
+  border-radius: 12px;
+  border: 2px solid #f0e68c;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  width: 90%;
+  max-width: 700px;
+  min-height: 350px;
+  padding: 25px 30px;
+  position: relative;
+  color: #fff;
+  overflow: hidden;
+}
+
+.close-button-jeep {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+  line-height: 1;
+  text-shadow: 0 0 3px black;
+}
+
+.close-button-jeep:hover {
+  color: #f0e68c;
+}
+
+.jeep-modal-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.jeep-anim-container {
+  flex-basis: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: 1px solid #444;
+  padding-right: 20px;
+}
+
+.jeep-sprite {
+  width: 128px;
+  height: 128px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  margin-bottom: 15px;
+}
+
+.jeep-anim-container h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f0e68c;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.jeep-anim-container p {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+  color: #ccc;
+}
+
+.jeep-location-list {
+  flex-basis: 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.location-button {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.location-button:hover {
+  background-color: #f0e68c;
+  border-color: #f0e68c;
+  color: #1e1e1e;
+  transform: translateX(5px);
+}
+
+.jeep-viaje-phase {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 350px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.jeep-sprite-viaje {
+  width: 192px;
+  height: 192px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.cargando-texto-jeep {
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-shadow: 0 0 5px black;
+  margin-top: 20px;
+}

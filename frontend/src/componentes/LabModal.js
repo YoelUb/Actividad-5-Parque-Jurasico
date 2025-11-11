@@ -64,11 +64,16 @@ const LabModal = ({ isOpen, phase, onClose }) => {
     return () => clearInterval(intervalId);
   }, [phase, isOpen]);
 
-  useEffect(() => {
-    if (animacion === 'roar' && isOpen && phase === 'lab') {
-      roarSound.play();
+  const handleAnimacionChange = (nuevaAnimacion) => {
+    setAnimacion(nuevaAnimacion);
+
+    if (nuevaAnimacion === 'roar' && isOpen && phase === 'lab') {
+      roarSound.currentTime = 0;
+      roarSound.play().catch(error => {
+        console.log('Error reproduciendo sonido:', error);
+      });
     }
-  }, [animacion, isOpen, phase]);
+  };
 
   const renderContent = () => {
     if (phase === 'helicopter') {
@@ -108,7 +113,7 @@ const LabModal = ({ isOpen, phase, onClose }) => {
             {animacionesDisponibles.map((anim) => (
               <button
                 key={anim.id}
-                onClick={() => setAnimacion(anim.id)}
+                onClick={() => handleAnimacionChange(anim.id)}
                 className="control-boton"
               >
                 {anim.nombre}
@@ -141,7 +146,6 @@ const LabModal = ({ isOpen, phase, onClose }) => {
             exit={{ scale: 0.7 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={onClose} className="close-button-lab">&times;</button>
             {renderContent()}
           </motion.div>
         </motion.div>
