@@ -129,3 +129,13 @@ class VerificationRequest(BaseModel):
 class DisenoParque(BaseModel):
     zonas: list
     recintos: List[RecintoSchema]
+
+
+class HistorialEnviosPubliSchema(BaseModel):
+    id: int
+    timestamp: datetime
+    admin_username: str
+    destinatarios_count: int
+
+    class Config:
+        from_attributes = True

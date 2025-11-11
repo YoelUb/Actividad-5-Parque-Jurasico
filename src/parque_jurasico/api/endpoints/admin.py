@@ -6,7 +6,7 @@ from ...bd.BaseDatos import get_db_session
 from ...security import seguridad
 from ...modelos import dinosaurio as modelos
 from ...modelos.dinosaurio import Usuario, Dinosaurio as DinosaurioTabla, Recinto as RecintoTabla, HistorialEnviosPubli, \
-    UserReadSchema
+    UserReadSchema, HistorialEnviosPubliSchema
 from ...core import email_config
 import logging
 
@@ -140,3 +140,14 @@ async def asignar_dino_a_recinto(
     await db.commit()
 
     return {"message": f"Dinosaurio {dino.nombre} asignado a {recinto.nombre}"}
+
+
+@router.get("/logs/marketing", response_model=List[modelos.HistorialEnviosPubliSchema])
+async def get_marketing_logs(
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    query = select(HistorialEnviosPubli).order_by(HistorialEnviosPubli.timestamp.desc()).limit(100)
+    result = await db.execute(query)
+    logs = result.scalars().all()
+    return logs
