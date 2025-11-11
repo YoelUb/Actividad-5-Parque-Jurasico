@@ -20,6 +20,7 @@ class EmailSettings(BaseSettings):
     MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS", "False").lower() == "true"
     USE_CREDENTIALS: bool = os.getenv("USE_CREDENTIALS", "True").lower() == "true"
     VALIDATE_CERTS: bool = os.getenv("VALIDATE_CERTS", "True").lower() == "true"
+    FRONTEND_DOMAIN: str = os.getenv("FRONTEND_DOMAIN", "http://localhost:3000")
 
     class Config:
         extra = 'ignore'
@@ -135,6 +136,73 @@ def create_jurassic_park_email_template(code: str, nombre_usuario: str) -> str:
             <div class="footer">
                 <p>&copy; 2024 InGen Corporation. Todos los derechos reservados.</p>
                 <p>Isla Nublar</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+
+def create_confirmation_email_template(nombre_usuario: str, email_usuario: str, login_url: str) -> str:
+    return f"""
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>¡Cuenta Verificada! - Jurassic Park</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif; line-height: 1.6;
+                background-color: #f4f4f4; margin: 0; padding: 0;
+            }}
+            .container {{
+                width: 90%; max-width: 600px; margin: 20px auto;
+                background-color: #ffffff; border: 1px solid #ddd;
+                border-radius: 8px; overflow: hidden;
+            }}
+            .header {{
+                background-color: #27ae60; color: #ffffff;
+                padding: 20px; text-align: center;
+            }}
+            .header h1 {{ margin: 0; font-size: 24px; }}
+            .content {{ padding: 30px; }}
+            .content p {{ font-size: 16px; color: #333; }}
+            .button {{
+                display: inline-block;
+                background-color: #27ae60;
+                color: #ffffff;
+                padding: 12px 25px;
+                margin: 20px 0;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }}
+            .footer {{
+                background-color: #333; color: #aaa;
+                padding: 20px; text-align: center; font-size: 12px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>¡Bienvenido a Bordo!</h1>
+            </div>
+            <div class="content">
+                <p>Hola, {nombre_usuario},</p>
+                <p>Tu cuenta de Jurassic Park ha sido <strong>VERIFICADA :)</strong>. ¡Ya tienes acceso completo al parque!</p>
+                <p>Puedes iniciar sesión en cualquier momento usando tu correo:</p>
+                <p><strong>Usuario:</strong> {email_usuario}</p>
+
+                <p style="text-align: center;">
+                    <a href="{login_url}" class="button">Entrar al Parque</a>
+                </p>
+
+                <p>¡Esperamos verte pronto en la isla!</p>
+                <p><strong>— El Equipo de InGen</strong></p>
+            </div>
+            <div class="footer">
+                <p>&copy; 2024 InGen Corporation. Todos los derechos reservados.</p>
             </div>
         </div>
     </body>

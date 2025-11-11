@@ -108,6 +108,7 @@ async def register_user(
 @router.post("/verify-email")
 async def verify_email(
         data: modelos.VerificationRequest,
+        background_tasks: BackgroundTasks,
         db: AsyncSession = Depends(get_db_session)
 ):
     result = await db.execute(select(UsuarioDBModel).where(UsuarioDBModel.username == data.email))
@@ -135,6 +136,26 @@ async def verify_email(
     usuario_db.is_active = True
     await db.delete(token_db)
     await db.commit()
+
+    try:
+        login_url = email_config.settings.FRONTEND_DOMAIN
+
+        html_content = email_config.create_confirmation_email_template(
+            nombre_usuario=usuario_db.nombre,
+            email_usuario=usuario_db.username,
+            login_url=login_url
+        )
+
+        message = email_config.MessageSchema(
+            subject="¡Tu cuenta de Jurassic Park ha sido verificada!",
+            recipients=[usuario_db.username],
+            body=html_content,
+            subtype=email_config.MessageType.html
+        )
+
+        background_tasks.add_task(email_config.fm.send_message, message)
+    except Exception as e:
+        print(f"Error al enviar email de confirmación a {usuario_db.username}: {e}")
 
     return {"message": "Correo verificado exitosamente. Ya puedes iniciar sesión."}
 

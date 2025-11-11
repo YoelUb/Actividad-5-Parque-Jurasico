@@ -37,6 +37,12 @@ function Registro({ onRegistroExitoso }) {
             return false;
         }
 
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(formData.email)) {
+            setError('Por favor, introduce un correo electrónico válido.');
+            return false;
+        }
+
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()]).{8,}$/;
         if (!passwordRegex.test(formData.password)) {
             setError(PASSWORD_POLICY_ERROR);
