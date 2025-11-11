@@ -10,6 +10,8 @@ import DinoModal from './componentes/DinoModal';
 import LabModal from './componentes/LabModal';
 import './App.css';
 
+import IntroAnimacion from './componentes/IntroAnimacion';
+
 const API_URL = 'http://localhost:8000/api';
 
 function Aplicacion() {
@@ -24,18 +26,19 @@ function Aplicacion() {
     const [labModalAbierto, setLabModalAbierto] = useState(false);
     const [labModalPhase, setLabModalPhase] = useState('helicopter');
 
-    const [pantallaAuth, setPantallaAuth] = useState('login'); // 'login', 'register', 'forceChange', 'verifyEmail'
+    const [pantallaAuth, setPantallaAuth] = useState('login');
     const [tokenLimitado, setTokenLimitado] = useState(null);
-    const [emailParaVerificar, setEmailParaVerificar] = useState(null); // <-- NUEVO ESTADO
+    const [emailParaVerificar, setEmailParaVerificar] = useState(null);
+
+    const [mostrandoIntro, setMostrandoIntro] = useState(true);
 
     const manejarCierreSesion = useCallback(() => {
+        localStorage.removeItem('jurassic_token');
         setToken(null);
         setUsuarioActual(null);
-        localStorage.removeItem('jurassic_token');
-        setModalAbierto(false);
+        setDinos({});
         setPantallaAuth('login');
-        setEmailParaVerificar(null);
-        setTokenLimitado(null);
+        setModalAbierto(false);
     }, []);
 
     const iniciarCierreSesion = () => {
@@ -43,14 +46,15 @@ function Aplicacion() {
     };
 
     useEffect(() => {
-        if (!token) {
+        if (!token || mostrandoIntro) {
             setCargando(false);
             return;
         }
 
         const obtenerDatosIniciales = async () => {
+            setCargando(true);
             try {
-
+                // NOTA: Esta lógica de fetch la he mantenido de tu App.js original
                 const userRes = await fetch(`${API_URL}/auth/me`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -63,27 +67,31 @@ function Aplicacion() {
                 });
                 const allDinos = await dinosRes.json();
                 const dinosById = allDinos.reduce((acc, dino) => {
-                    acc[dino.id] = dino;
+                    acc[dino.id] = dino; // Asumiendo que 'id' existe; ajusta si es 'dino_id_str'
                     return acc;
                 }, {});
                 setDinos(dinosById);
 
             } catch (err) {
                 console.error(err);
-                setToken(null);
-                localStorage.removeItem('jurassic_token');
-                setPantallaAuth('login');
+                manejarCierreSesion();
             } finally {
                 setCargando(false);
             }
         };
 
         obtenerDatosIniciales();
-    }, [token]);
+    }, [token, mostrandoIntro, manejarCierreSesion]);
 
-    const manejarLoginExitoso = (nuevoToken) => {
-        setToken(nuevoToken);
-        localStorage.setItem('jurassic_token', nuevoToken);
+    const manejarLoginExitoso = (nuevoToken, mustChangePassword) => {
+        if (mustChangePassword) {
+            setTokenLimitado(nuevoToken);
+            setPantallaAuth('forceChange');
+        } else {
+            localStorage.setItem('jurassic_token', nuevoToken);
+            setToken(nuevoToken);
+            setPantallaAuth('login');
+        }
     };
 
     const handleDinoSelect = (dinoId) => {
@@ -99,8 +107,6 @@ function Aplicacion() {
     const handleHelipuertoClick = () => {
         setLabModalPhase('helicopter');
         setLabModalAbierto(true);
-
-
         setTimeout(() => {
             setLabModalPhase('lab');
         }, 2000);
@@ -128,9 +134,17 @@ function Aplicacion() {
         setPantallaAuth('verifyEmail');
     };
 
+    const handleEmpezar = () => {
+        setMostrandoIntro(false);
+    };
 
     const renderizarContenido = () => {
-        if (cargando) {
+
+        if (mostrandoIntro) {
+            return <IntroAnimacion onEmpezar={handleEmpezar} />;
+        }
+
+        if (cargando && token) {
             return <h1>Cargando...</h1>;
         }
 
@@ -179,7 +193,9 @@ function Aplicacion() {
 
     return (
         <div className="App">
-            <header className="App-header">{renderizarContenido()}</header>
+            <header className={mostrandoIntro ? "App-header intro-active" : "App-header"}>
+                {renderizarContenido()}
+            </header>
 
             <ModalConfirmacion
                 isOpen={modalAbierto}

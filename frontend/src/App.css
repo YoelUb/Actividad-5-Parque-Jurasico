@@ -47,3 +47,13 @@
   color: #d92323;
   font-weight: bold;
 }
+
+
+.App-header.intro-active {
+  display: block;
+  justify-content: normal;
+  align-items: normal;
+  background-color: #000;
+  padding: 0;
+  min-height: 0;
+}
