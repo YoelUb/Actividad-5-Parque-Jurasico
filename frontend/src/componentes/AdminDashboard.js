@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
 import ModalConfirmacion from './ModalConfirmacion';
+import AdminDinoSelectModal from './AdminDinoSelectModal';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -12,6 +13,7 @@ const AdminDashboard = ({ onSalirClick }) => {
     const [loading, setLoading] = useState(true);
 
     const [promoModalAbierto, setPromoModalAbierto] = useState(false);
+    const [dinoSelectModalOpen, setDinoSelectModalOpen] = useState(false);
     const [emailStatus, setEmailStatus] = useState({
         loading: false,
         message: '',
@@ -23,6 +25,12 @@ const AdminDashboard = ({ onSalirClick }) => {
     const [herbivoreDino, setHerbivoreDino] = useState('BlueDino');
     const [aviaryDino, setAviaryDino] = useState('YellowDino');
     const [aquaDino, setAquaDino] = useState('DarkGreenDino');
+
+    const [saveStatus, setSaveStatus] = useState({
+        loading: false,
+        message: '',
+        error: false,
+    });
 
     const token = localStorage.getItem('jurassic_token');
 
@@ -47,22 +55,77 @@ const AdminDashboard = ({ onSalirClick }) => {
         { value: 'Black', label: 'Jeep Negro', path: '/Jeep/Jeep_Black/MOVE/SOUTH/SEPARATED/Black_JEEP_CLEAN_SOUTH_000.png' },
     ];
 
+    const trexOptions = [
+        {
+            value: 'RedDino',
+            label: 'T-Rex (Rojo)',
+            path: '/RedDino/RedDinosaur',
+            previewPath: '/RedDino/RedDinosaur1.png',
+            info: 'El Tyrannosaurus Rex, con su distintiva coloración roja, es la atracción principal.'
+        },
+        {
+            value: 'BlueDino',
+            label: 'T-Rex (Azul)',
+            path: '/BlueDino/BlueDinosaur',
+            previewPath: '/BlueDino/BlueDinosaur1.png',
+            info: 'Una variante genética de T-Rex, resultado de la experimentación. Su color azul lo hace único.'
+        },
+        {
+            value: 'YellowDino',
+            label: 'T-Rex (Amarillo)',
+            path: '/yellowDino/YellowDinosaur',
+            previewPath: '/yellowDino/YellowDinosaur1.png',
+            info: 'Adaptado para camuflaje en zonas más áridas, esta variante amarilla es igual de imponente.'
+        },
+         {
+            value: 'DarkGreenDino',
+            label: 'T-Rex (Verde Oscuro)',
+            path: '/DarkGreenDino/DarkGreenDinosaur',
+            previewPath: '/DarkGreenDino/DarkGreenDinosaur1.png',
+            info: 'Una variante adaptada al camuflaje de jungla densa. Más difícil de ver, pero igual de letal.'
+        },
+        {
+            value: 'liteGreenDino',
+            label: 'T-Rex (Verde claro)',
+            path: '/liteGreenDino/LightGreenDinosaur',
+            previewPath: '/liteGreenDino/LightGreenDinosaur1.png',
+            info: 'Una mutación más joven y ágil, su coloración clara le permite cazar en praderas abiertas.'
+        },
+    ];
+
     const getPreviewPath = (options, value) => {
-        const selected = options.find(opt => opt.value === value);
-        return selected ? selected.path : '';
+        let selected = trexOptions.find(opt => opt.value === value);
+        if (selected) return selected.previewPath;
+
+        selected = dinoOptions.find(opt => opt.value === value);
+        if (selected) return selected.path;
+
+        selected = jeepOptions.find(opt => opt.value === value);
+        if (selected) return selected.path;
+
+        return '';
     };
 
+
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAdminData = async () => {
             setLoading(true);
             try {
                 const [usersRes, logsRes] = await Promise.all([
                     axios.get(`${API_URL}/admin/users/`, authHeaders),
                     axios.get(`${API_URL}/admin/logs/marketing`, authHeaders)
                 ]);
-
                 setUsers(usersRes.data);
                 setLogs(logsRes.data);
+
+                const assetsRes = await axios.get(`${API_URL}/assets/config`);
+                const config = assetsRes.data;
+                setJeepColor(config.jeepColor);
+                setCarnivoreDino(config.carnivoreDino);
+                setHerbivoreDino(config.herbivoreDino);
+                setAviaryDino(config.aviaryDino);
+                setAquaDino(config.aquaDino);
+
                 setError('');
             } catch (err) {
                 console.error(err);
@@ -73,7 +136,7 @@ const AdminDashboard = ({ onSalirClick }) => {
         };
 
         if (token) {
-            fetchData();
+            fetchAdminData();
         } else {
             setError('No se encontró un token válido.');
             setLoading(false);
@@ -101,15 +164,42 @@ const AdminDashboard = ({ onSalirClick }) => {
         }
     };
 
-    const handleAssetSave = () => {
-        console.log("Guardando configuración de assets (lógica futura):");
-        console.log({
-            jeep: jeepColor,
-            carnivoro: carnivoreDino,
-            herbivoro: herbivoreDino,
-            aviario: aviaryDino,
-            acuario: aquaDino,
-        });
+    const handleSelectCarnivoreDino = (dinoValue) => {
+        setCarnivoreDino(dinoValue);
+        setDinoSelectModalOpen(false);
+    };
+
+    const handleAssetSave = async () => {
+        setSaveStatus({ loading: true, message: '', error: false });
+
+        const configData = {
+            jeepColor: jeepColor,
+            carnivoreDino: carnivoreDino,
+            herbivoreDino: herbivoreDino,
+            aviaryDino: aviaryDino,
+            aquaDino: aquaDino,
+        };
+
+        try {
+            const response = await axios.put(
+                `${API_URL}/assets/config`,
+                configData,
+                authHeaders
+            );
+
+            setSaveStatus({
+                loading: false,
+                message: response.data.message || 'Configuración guardada.',
+                error: false,
+            });
+
+            setTimeout(() => setSaveStatus({ ...saveStatus, message: '' }), 3000);
+
+        } catch (err) {
+            console.error(err);
+            const errorMsg = err.response?.data?.detail || 'Error al guardar la configuración.';
+            setSaveStatus({ loading: false, message: errorMsg, error: true });
+        }
     };
 
     const formatTimestamp = (isoString) => {
@@ -172,6 +262,7 @@ const AdminDashboard = ({ onSalirClick }) => {
                     <div className="dashboard-section asset-config-section">
                         <h3>Configuración de Assets</h3>
                         <div className="asset-config-grid">
+
                             <div className="asset-selector">
                                 <label>Transporte (Coche)</label>
                                 <img src={getPreviewPath(jeepOptions, jeepColor)} alt="Jeep" className="asset-preview" />
@@ -181,15 +272,18 @@ const AdminDashboard = ({ onSalirClick }) => {
                                     ))}
                                 </select>
                             </div>
+
                             <div className="asset-selector">
-                                <label>Recinto Carnívoros</label>
-                                <img src={getPreviewPath(dinoOptions, carnivoreDino)} alt="Dino" className="asset-preview" />
-                                <select value={carnivoreDino} onChange={(e) => setCarnivoreDino(e.target.value)}>
-                                    {dinoOptions.map(opt => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                </select>
+                                <label>Recinto Carnívoros (T-Rex)</label>
+                                <img src={getPreviewPath(trexOptions, carnivoreDino)} alt="Dino Carnívoro" className="asset-preview" />
+                                <button
+                                    className="change-asset-btn"
+                                    onClick={() => setDinoSelectModalOpen(true)}
+                                >
+                                    Cambiar Dinosaurio
+                                </button>
                             </div>
+
                             <div className="asset-selector">
                                 <label>Recinto Herbívoros</label>
                                 <img src={getPreviewPath(dinoOptions, herbivoreDino)} alt="Dino" className="asset-preview" />
@@ -199,6 +293,7 @@ const AdminDashboard = ({ onSalirClick }) => {
                                     ))}
                                 </select>
                             </div>
+
                             <div className="asset-selector">
                                 <label>Recinto Aviario</label>
                                 <img src={getPreviewPath(dinoOptions, aviaryDino)} alt="Dino" className="asset-preview" />
@@ -208,6 +303,7 @@ const AdminDashboard = ({ onSalirClick }) => {
                                     ))}
                                 </select>
                             </div>
+
                             <div className="asset-selector">
                                 <label>Recinto Acuario</label>
                                 <img src={getPreviewPath(dinoOptions, aquaDino)} alt="Dino" className="asset-preview" />
@@ -218,9 +314,15 @@ const AdminDashboard = ({ onSalirClick }) => {
                                 </select>
                             </div>
                         </div>
-                        <button onClick={handleAssetSave} className="promo-button save-assets-btn">
-                            Guardar Cambios de Assets
+
+                        <button onClick={handleAssetSave} className="promo-button save-assets-btn" disabled={saveStatus.loading}>
+                            {saveStatus.loading ? "Guardando..." : "Guardar Cambios de Assets"}
                         </button>
+                        {saveStatus.message && (
+                            <p className={saveStatus.error ? 'error-message' : 'success-message'} style={{marginTop: '10px'}}>
+                                {saveStatus.message}
+                            </p>
+                        )}
                     </div>
 
                     <div className="dashboard-section">
@@ -247,6 +349,13 @@ const AdminDashboard = ({ onSalirClick }) => {
                 onClose={() => setPromoModalAbierto(false)}
                 onConfirm={handleSendPromoEmail}
                 message="¿Confirmas el envío del correo promocional a todos los usuarios válidos?"
+            />
+
+            <AdminDinoSelectModal
+              isOpen={dinoSelectModalOpen}
+              onClose={() => setDinoSelectModalOpen(false)}
+              onSelectDino={handleSelectCarnivoreDino}
+              dinoOptions={trexOptions}
             />
         </div>
     );

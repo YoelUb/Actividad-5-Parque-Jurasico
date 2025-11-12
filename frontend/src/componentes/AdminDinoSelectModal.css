@@ -1,0 +1,134 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.admin-dino-modal-content {
+    background-color: #1e1e1e;
+    padding: 25px;
+    border-radius: 10px;
+    border: 2px solid #ff4136;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+    color: #f5f5f5;
+}
+
+.admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #f0e68c;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.admin-modal-header h2 {
+    color: #f0e68c;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: #f5f5f5;
+    font-size: 2.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.modal-close-btn:hover {
+    color: #ff4136;
+}
+
+.admin-modal-instructions {
+    font-size: 1.1rem;
+    color: #ccc;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.dino-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.dino-card {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.dino-card:hover {
+    border-color: #f0e68c;
+    transform: translateY(-5px);
+}
+
+.dino-card-anim-container {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.dino-card-anim-container .sprite-animator-container {
+    width: 128px;
+    height: 128px;
+    transform: scale(0.8);
+}
+
+.dino-card h3 {
+    color: #f0e68c;
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.dino-card p {
+    font-size: 0.9rem;
+    color: #ccc;
+    flex-grow: 1;
+    margin-bottom: 15px;
+}
+
+.dino-select-btn {
+    background-color: #2ecc40;
+    color: #1a1a1a;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 100%;
+}
+
+.dino-select-btn:hover {
+    background-color: #28b838;
+}

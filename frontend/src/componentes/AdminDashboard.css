@@ -230,3 +230,21 @@
 .save-assets-btn:hover {
     background-color: #28b838;
 }
+
+
+.asset-selector .change-asset-btn {
+    background-color: #f0e68c;
+    color: #1a1a1a;
+    border: 2px solid #f0e68c;
+    border-radius: 5px;
+    padding: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.asset-selector .change-asset-btn:hover {
+    background-color: #e0d57a;
+    border-color: #e0d57a;
+}
