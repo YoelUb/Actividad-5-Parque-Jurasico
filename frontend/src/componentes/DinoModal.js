@@ -1,46 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react'; // Importa useState
+import SpriteAnimator from './SpriteAnimator';
 import './DinoModal.css';
 
-const getDinoImage = (dinoId) => {
-    const dinoImageMap = {
-        'dino_001': '/TREX1.png',
-        'dino_002': '/mosasaurios.png',
-        'dino_003': '/Pteranodon.png',
-        'dino_004': '/Triceraptors_2.png',
-        'dino_005': '/broncosaurius.png',
-    };
-    return dinoImageMap[dinoId] || '/logo512.png';
-}
+const DinoModal = ({ dino, onClose }) => {
+    const [animationType, setAnimationType] = useState('idle');
 
-function DinoModal({ dino, onClose }) {
     if (!dino) {
         return null;
     }
 
-    const dinoImage = getDinoImage(dino.id);
+    const tieneAnimaciones = dino.sprite_base_path && dino.animations;
 
     return (
-        <div className="modal-backdrop-dino" onClick={onClose}>
-            <div className="modal-content-dino" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="dino-modal-content" onClick={(e) => e.stopPropagation()}>
 
-                <button onClick={onClose} className="close-button-dino">&times;</button>
-
-                <img src={dinoImage} alt={dino.nombre} className="dino-modal-image" />
                 <h2>{dino.nombre}</h2>
-                <div className="dino-info">
-                    <p><strong>Era:</strong> {dino.era}</p>
-                    <p><strong>Dieta:</strong> {dino.dieta}</p>
-                    <p><strong>Área:</strong> {dino.area}</p>
-                    <p><strong>Tipo de Recinto:</strong> {dino.tipo_recinto}</p>
+                <span className="dino-species">{dino.especie} - {dino.dieta}</span>
 
-                    {dino.descripcion && (
-                        <p className="dino-descripcion">{dino.descripcion}</p>
-                    )}
-
+                <div className="dino-modal-body">
+                    <div className="dino-anim-container">
+                        {tieneAnimaciones ? (
+                            <SpriteAnimator
+                                basePath={dino.sprite_base_path}
+                                animations={dino.animations}
+                                animationName={animationType}
+                                fps={10}
+                            />
+                        ) : (
+                            <div className="anim-placeholder">Animación no disponible</div>
+                        )}
+                    </div>
+                    <p className="dino-description">{dino.descripcion}</p>
                 </div>
+
+                {tieneAnimaciones && (
+                    <div className="dino-modal-controls">
+                        <button
+                            onClick={() => setAnimationType('idle')}
+                            className={animationType === 'idle' ? 'active' : ''}
+                        >
+                            Parado (Idle)
+                        </button>
+                        <button
+                            onClick={() => setAnimationType('walk')}
+                            className={animationType === 'walk' ? 'active' : ''}
+                        >
+                            Andar
+                        </button>
+                    </div>
+                )}
+
+                <button onClick={onClose} className="modal-close-btn">&times;</button>
             </div>
         </div>
     );
-}
+};
 
 export default DinoModal;

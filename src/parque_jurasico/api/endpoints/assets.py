@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from pydantic import BaseModel
 from pathlib import Path
 from ...security.seguridad import get_current_active_admin
-from ...modelos.dinosaurio import Usuario  # <--- Importas 'Usuario'
+from ...modelos.dinosaurio import Usuario
 
 router = APIRouter()
 
