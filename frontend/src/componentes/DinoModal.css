@@ -17,7 +17,7 @@
     background: linear-gradient(145deg, #1f2228, #2c3038);
     padding: 2.5rem;
     border-radius: 16px;
-    border: 2px solid #ff4136;
+    border: 2px solid #d4af37;
     box-shadow: 0 0 30px rgba(255, 65, 54, 0.3);
     color: #f5f5f5;
     width: 95%;
@@ -44,7 +44,7 @@
 }
 
 .dino-modal-content h2 {
-    color: #ff4136;
+    color: #d4af37;
     font-size: 2.3rem;
     letter-spacing: 1px;
     margin-bottom: 0.5rem;
@@ -89,8 +89,7 @@
     color: #ddd;
     line-height: 1.7;
     text-align: justify;
-    background-color: rgba(255, 255, 255, 0.03);
-    border-left: 3px solid #ff4136;
+    border-left: 3px solid #d4af37;
     padding: 1rem 1.5rem;
     border-radius: 8px;
 }
@@ -123,10 +122,10 @@
 }
 
 .dino-modal-controls button.active {
-    background-color: #ff4136;
-    border-color: #ff4136;
+    background-color: #d4af37;
+    border-color: black;
     color: white;
-    box-shadow: 0 0 10px rgba(255, 65, 54, 0.4);
+    box-shadow: 0 0 10px #d4af37;
 }
 
 @media (max-width: 800px) {

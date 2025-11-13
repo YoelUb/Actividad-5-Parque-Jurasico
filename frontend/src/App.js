@@ -218,6 +218,8 @@ function Aplicacion() {
                 onClose={() => setModalAbierto(false)}
                 onConfirm={manejarCierreSesion}
                 message="¿Quieres abandonar el parque?"
+                confirmText={"Si, abandonar"}
+                cancelText={"Quedarse"}
             />
 
             <DinoModal dino={dinoSeleccionado} onClose={handleCloseDinoModal}/>
