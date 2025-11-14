@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Image } from 'react-konva';
 import useImage from 'use-image';
 
-// 1. Define la lista de fotogramas de la animación
 const FRAME_PATHS = [
   '/helicoptero/separated_frames/helicopter_1.png',
   '/helicoptero/separated_frames/helicopter_2.png',
@@ -19,6 +18,8 @@ const SPRITE_SIZE = 64;
 function HelicopteroAnimado({ x, y, scale, onHover, onClick, pointName }) {
   const [frame, setFrame] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+
+  const [helicopterSound] = useState(new Audio('/helicoptero.mp3'));
 
   const [image] = useImage(FRAME_PATHS[frame]);
 
@@ -48,6 +49,14 @@ function HelicopteroAnimado({ x, y, scale, onHover, onClick, pointName }) {
     if (stage) stage.content.style.cursor = 'default';
   };
 
+  const handleClickAndPlaySound = (e) => {
+    helicopterSound.currentTime = 0;
+    helicopterSound.play();
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
   const currentScale = isHovered ? scale * 1.2 : scale;
 
   return (
@@ -61,8 +70,8 @@ function HelicopteroAnimado({ x, y, scale, onHover, onClick, pointName }) {
       offsetY={SPRITE_SIZE / 2}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={onClick}
-      onTap={onClick}
+      onClick={handleClickAndPlaySound}
+      onTap={handleClickAndPlaySound}
     />
   );
 }

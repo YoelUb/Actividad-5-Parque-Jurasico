@@ -7,10 +7,9 @@ from ...modelos.dinosaurio import Usuario
 
 router = APIRouter()
 
-CONFIG_FILE = Path("src/parque_jurasico/assets_config.json")
-
 
 class AssetConfig(BaseModel):
+    """Modelo Pydantic actualizado. 'herbivoreDinoSecundario' eliminado."""
     jeepColor: str
     carnivoreDino: str
     herbivoreDino: str
@@ -19,6 +18,7 @@ class AssetConfig(BaseModel):
 
 
 def get_config_path():
+    """Obtiene la ruta al archivo de configuración en la raíz de 'src'"""
     base_dir = Path(__file__).resolve().parent.parent.parent
     return base_dir / "assets_config.json"
 
@@ -31,10 +31,15 @@ async def get_asset_config():
     """
     config_path = get_config_path()
     if not config_path.exists():
+
         default_config = {
-            "jeepColor": "Green", "carnivoreDino": "RedDino", "herbivoreDino": "BlueDino",
-            "aviaryDino": "YellowDino", "aquaDino": "DarkGreenDino"
+            "jeepColor": "Green",
+            "carnivoreDino": "RedDino",
+            "herbivoreDino": "triceratops",
+            "aviaryDino": "volador",
+            "aquaDino": "marino"
         }
+
         try:
             with open(config_path, "w") as f:
                 json.dump(default_config, f, indent=4)
@@ -45,6 +50,13 @@ async def get_asset_config():
     try:
         with open(config_path, "r") as f:
             config = json.load(f)
+
+        if "herbivoreDinoSecundario" in config:
+            del config["herbivoreDinoSecundario"]
+
+        config["aviaryDino"] = "volador"
+        config["aquaDino"] = "marino"
+
         return config
     except IOError as e:
         raise HTTPException(status_code=500, detail=f"No se pudo leer el archivo de configuración: {e}")
@@ -54,8 +66,8 @@ async def get_asset_config():
 
 @router.put("/config", status_code=200)
 async def update_asset_config(
-    config: AssetConfig,
-    admin: Usuario = Depends(get_current_active_admin)
+        config: AssetConfig,
+        admin: Usuario = Depends(get_current_active_admin)
 ):
     """
     Actualiza la configuración de assets. Requiere ser admin.

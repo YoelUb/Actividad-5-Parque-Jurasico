@@ -20,6 +20,7 @@ def get_config_path():
 
 
 ASSET_DATA_MAP = {
+    # Carnívoros
     "RedDino": {
         "nombre": "T-Rex (Rojo)",
         "sprite_base_path": "/RedDino/RedDinosaur",
@@ -45,21 +46,24 @@ ASSET_DATA_MAP = {
         "sprite_base_path": "/liteGreenDino/LightGreenDinosaur",
         "descripcion": "Una mutación más joven y ágil, su coloración clara le permite cazar en praderas abiertas."
     },
+    "Dino_Especial": {
+        "nombre": "Spinosaurus",
+        "sprite_base_path": "/Dino_Especial/idle/Spino",
+        "descripcion": "Un temible depredador semi-acuático con animaciones 'idle' y 'walk'."
+    },
 
-    "RedDino_generic": {"sprite_base_path": "/RedDino/RedDinosaur"},
-    "BlueDino_generic": {"sprite_base_path": "/BlueDino/BlueDinosaur"},
-    "YellowDino_generic": {"sprite_base_path": "/yellowDino/YellowDinosaur"},
-    "DarkGreenDino_generic": {"sprite_base_path": "/DarkGreenDino/DarkGreenDinosaur"},
-    "liteGreenDino_generic": {"sprite_base_path": "/liteGreenDino/LightGreenDinosaur"}
+    "triceratops": {
+        "nombre": "Triceratops",
+        "sprite_base_path": "/triceraptors/triceraptors",
+        "descripcion": "Un robusto herbívoro conocido por sus tres cuernos y su gran gola ósea. Prefiere las llanuras."
+    },
+    "broncosaurio_azul": {
+        "nombre": "Brontosaurus (Azul)",
+        "sprite_base_path": "/broncosaurio_azul/idle/broncosaurio",
+        "descripcion": "Un gentil gigante de cuello largo con una distintiva coloración azulada."
+    }
 }
 
-GENERIC_ASSET_MAP = {
-    "RedDino": "/RedDino/RedDinosaur",
-    "BlueDino": "/BlueDino/BlueDinosaur",
-    "YellowDino": "/yellowDino/YellowDinosaur",
-    "DarkGreenDino": "/DarkGreenDino/DarkGreenDinosaur",
-    "liteGreenDino": "/liteGreenDino/LightGreenDinosaur",
-}
 
 
 async def _get_asset_config():
@@ -69,7 +73,13 @@ async def _get_asset_config():
         with open(config_path, "r") as f:
             return json.load(f)
     except Exception:
-        return None
+        return {
+            "jeepColor": "Green",
+            "carnivoreDino": "RedDino",
+            "herbivoreDino": "triceratops",
+            "aviaryDino": "volador",
+            "aquaDino": "marino"
+        }
 
 
 def _apply_asset_override(dino, config):
@@ -87,21 +97,12 @@ def _apply_asset_override(dino, config):
 
     elif dino.dino_id_str == "dino_004":
         asset_key = config.get("herbivoreDino")
-        sprite_path = GENERIC_ASSET_MAP.get(asset_key)
-        if sprite_path:
-            dino.sprite_base_path = sprite_path
+        variant_data = ASSET_DATA_MAP.get(asset_key)
+        if variant_data:
+            dino.nombre = variant_data.get("nombre", dino.nombre)
+            dino.descripcion = variant_data.get("descripcion", dino.descripcion)
+            dino.sprite_base_path = variant_data.get("sprite_base_path", dino.sprite_base_path)
 
-    elif dino.dino_id_str == "dino_003":
-        asset_key = config.get("aviaryDino")
-        sprite_path = GENERIC_ASSET_MAP.get(asset_key)
-        if sprite_path:
-            dino.sprite_base_path = sprite_path
-
-    elif dino.dino_id_str == "dino_002":
-        asset_key = config.get("aquaDino")
-        sprite_path = GENERIC_ASSET_MAP.get(asset_key)
-        if sprite_path:
-            dino.sprite_base_path = sprite_path
 
     return dino
 
@@ -121,7 +122,6 @@ async def obtener_dinosaurio(
         raise HTTPException(status_code=404, detail="Dinosaurio no encontrado")
 
     dino = copy.deepcopy(dino_db)
-
     config = await _get_asset_config()
     dino = _apply_asset_override(dino, config)
 
@@ -151,7 +151,6 @@ async def get_todos_los_dinosaurios(
         return dinos_db
 
     dinos_actualizados = [copy.deepcopy(dino) for dino in dinos_db]
-
     dinos_finales = [_apply_asset_override(dino, config) for dino in dinos_actualizados]
 
     return dinos_finales

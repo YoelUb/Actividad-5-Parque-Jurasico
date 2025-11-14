@@ -23,6 +23,8 @@ function JeepAnimado({ x, y, scale, onHover, onClick, pointName }) {
   const [frame, setFrame] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  const [jeepSound] = useState(new Audio('/jeep.mp3'));
+
   const [image] = useImage(FRAME_PATHS[frame]);
 
   useEffect(() => {
@@ -51,6 +53,14 @@ function JeepAnimado({ x, y, scale, onHover, onClick, pointName }) {
     if (stage) stage.content.style.cursor = 'default';
   };
 
+  const handleClickAndPlaySound = (e) => {
+    jeepSound.currentTime = 0;
+    jeepSound.play();
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
   const currentScale = isHovered ? scale * 1.2 : scale;
 
   return (
@@ -64,8 +74,8 @@ function JeepAnimado({ x, y, scale, onHover, onClick, pointName }) {
       offsetY={SPRITE_SIZE / 2}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={onClick}
-      onTap={onClick}
+      onClick={handleClickAndPlaySound}
+      onTap={handleClickAndPlaySound}
       imageSmoothingEnabled={false}
     />
   );
