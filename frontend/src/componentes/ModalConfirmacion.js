@@ -16,12 +16,16 @@ const ModalConfirmacion = ({
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <p>{message}</p>
-                <div className="modal-buttons">
-                    <button onClick={onConfirm} className="modal-btn confirm-btn">
+
+                <div className="modal-body">
+                    <p>{message}</p>
+                </div>
+
+                <div className="modal-footer">
+                    <button onClick={onConfirm} className="btn-confirmar">
                         {confirmText || 'Sí'}
                     </button>
-                    <button onClick={onClose} className="modal-btn cancel-btn">
+                    <button onClick={onClose} className="btn-cancelar">
                         {cancelText || 'No'}
                     </button>
                 </div>
