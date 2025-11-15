@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
 import ModalConfirmacion from './ModalConfirmacion';
@@ -172,7 +172,7 @@ const AdminDashboard = ({onSalirClick}) => {
 
     const authHeaders = useMemo(
         () => ({
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {Authorization: `Bearer ${token}`},
         }),
         [token]
     );
@@ -188,7 +188,7 @@ const AdminDashboard = ({onSalirClick}) => {
                 setUsers(usersRes.data);
                 setLogs(logsRes.data);
 
-                const assetsRes = await axios.get(`${API_URL}/assets/config`);
+                const assetsRes = await axios.get(`${API_URL}/assets/config`, authHeaders);
                 const config = assetsRes.data;
 
                 setJeepColor(config.jeepColor || 'Green');
@@ -217,7 +217,7 @@ const AdminDashboard = ({onSalirClick}) => {
 
     const handleSendPromoEmail = async () => {
         setPromoModalAbierto(false);
-        setEmailStatus({ loading: true, message: '', error: false });
+        setEmailStatus({loading: true, message: '', error: false});
         try {
             const response = await axios.post(`${API_URL}/admin/enviar-publicidad`, {}, authHeaders);
             setEmailStatus({
@@ -232,7 +232,7 @@ const AdminDashboard = ({onSalirClick}) => {
         } catch (err) {
             console.error(err);
             const errorMsg = err.response?.data?.detail || 'Error al enviar los correos.';
-            setEmailStatus({ loading: false, message: errorMsg, error: true });
+            setEmailStatus({loading: false, message: errorMsg, error: true});
         }
     };
 
@@ -247,7 +247,7 @@ const AdminDashboard = ({onSalirClick}) => {
     };
 
     const handleAssetSave = async () => {
-        setSaveStatus({ loading: true, message: '', error: false });
+        setSaveStatus({loading: true, message: '', error: false});
 
         const configData = {
             jeepColor: jeepColor,
@@ -271,12 +271,12 @@ const AdminDashboard = ({onSalirClick}) => {
                 error: false,
             });
 
-            setTimeout(() => setSaveStatus({ ...saveStatus, message: '' }), 3000);
+            setTimeout(() => setSaveStatus({...saveStatus, message: ''}), 3000);
 
         } catch (err) {
             console.error(err);
             const errorMsg = err.response?.data?.detail || 'Error al guardar la configuración.';
-            setSaveStatus({ loading: false, message: errorMsg, error: true });
+            setSaveStatus({loading: false, message: errorMsg, error: true});
         }
     };
 
@@ -343,7 +343,7 @@ const AdminDashboard = ({onSalirClick}) => {
 
                             <div className="asset-selector">
                                 <label>Transporte (Coche)</label>
-                                <img src={getPreviewPath(jeepColor)} alt="Jeep" className="asset-preview" />
+                                <img src={getPreviewPath(jeepColor)} alt="Jeep" className="asset-preview"/>
                                 <select value={jeepColor} onChange={(e) => setJeepColor(e.target.value)}>
                                     {jeepOptions.map(opt => (
                                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -353,7 +353,8 @@ const AdminDashboard = ({onSalirClick}) => {
 
                             <div className="asset-selector">
                                 <label>Recinto Carnívoros</label>
-                                <img src={getPreviewPath(carnivoreDino)} alt="Dino Carnívoro" className="asset-preview" />
+                                <img src={getPreviewPath(carnivoreDino)} alt="Dino Carnívoro"
+                                     className="asset-preview"/>
                                 <button
                                     className="change-asset-btn"
                                     onClick={() => setCarnivoreModalOpen(true)}
@@ -365,8 +366,11 @@ const AdminDashboard = ({onSalirClick}) => {
                             <div className="asset-selector">
                                 <label>Recinto Herbívoros</label>
                                 <div className="asset-preview-stacked">
-                                    <img src={getPreviewPath('triceratops')} alt="Triceratops" className="asset-preview" title="Triceratops (Fijo)" />
-                                    <img src={getPreviewPath(herbivoreDinoSecundario)} alt="Dino Herbívoro 2" className="asset-preview" title={herbivoreDinoSecundario === 'none' ? 'Ninguno' : 'Brontosaurus'} />
+                                    <img src={getPreviewPath('triceratops')} alt="Triceratops" className="asset-preview"
+                                         title="Triceratops (Fijo)"/>
+                                    <img src={getPreviewPath(herbivoreDinoSecundario)} alt="Dino Herbívoro 2"
+                                         className="asset-preview"
+                                         title={herbivoreDinoSecundario === 'none' ? 'Ninguno' : 'Brontosaurus'}/>
                                 </div>
                                 <button
                                     className="change-asset-btn"
@@ -378,22 +382,24 @@ const AdminDashboard = ({onSalirClick}) => {
 
                             <div className="asset-selector">
                                 <label>Recinto Aviario</label>
-                                <img src={getPreviewPath('volador')} alt="Dino Aviario" className="asset-preview" />
+                                <img src={getPreviewPath('volador')} alt="Dino Aviario" className="asset-preview"/>
                                 <span className="asset-name-static">Pteranodon (Fijo)</span>
                             </div>
 
                             <div className="asset-selector">
                                 <label>Recinto Acuario</label>
-                                <img src={getPreviewPath('marino')} alt="Dino Acuario" className="asset-preview" />
+                                <img src={getPreviewPath('marino')} alt="Dino Acuario" className="asset-preview"/>
                                 <span className="asset-name-static">Mosasaurus (Fijo)</span>
                             </div>
                         </div>
 
-                        <button onClick={handleAssetSave} className="promo-button save-assets-btn" disabled={saveStatus.loading}>
+                        <button onClick={handleAssetSave} className="promo-button save-assets-btn"
+                                disabled={saveStatus.loading}>
                             {saveStatus.loading ? "Guardando..." : "Guardar Cambios de Assets"}
                         </button>
                         {saveStatus.message && (
-                            <p className={saveStatus.error ? 'error-message' : 'success-message'} style={{marginTop: '10px'}}>
+                            <p className={saveStatus.error ? 'error-message' : 'success-message'}
+                               style={{marginTop: '10px'}}>
                                 {saveStatus.message}
                             </p>
                         )}
@@ -426,21 +432,21 @@ const AdminDashboard = ({onSalirClick}) => {
             />
 
             <AdminDinoSelectModal
-              isOpen={carnivoreModalOpen}
-              onClose={() => setCarnivoreModalOpen(false)}
-              onSelectDino={handleSelectCarnivoreDino}
-              dinoOptions={carnivoreOptions}
-              title="Seleccionar Carnívoro"
-              description="Elige la especie que se mostrará en el recinto de carnívoros."
+                isOpen={carnivoreModalOpen}
+                onClose={() => setCarnivoreModalOpen(false)}
+                onSelectDino={handleSelectCarnivoreDino}
+                dinoOptions={carnivoreOptions}
+                title="Seleccionar Carnívoro"
+                description="Elige la especie que se mostrará en el recinto de carnívoros."
             />
 
             <AdminDinoSelectModal
-              isOpen={herbivoreModalOpen}
-              onClose={() => setHerbivoreModalOpen(false)}
-              onSelectDino={handleSelectHerbivoreDino}
-              dinoOptions={herbivoreOptions}
-              title={"Seleccionar Hervívoro"}
-              description={"Elige a la especie que se mostrará en el recinto de hervívoros"}
+                isOpen={herbivoreModalOpen}
+                onClose={() => setHerbivoreModalOpen(false)}
+                onSelectDino={handleSelectHerbivoreDino}
+                dinoOptions={herbivoreOptions}
+                title={"Seleccionar Hervívoro"}
+                description={"Elige a la especie que se mostrará en el recinto de hervívoros"}
             />
         </div>
     );

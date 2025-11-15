@@ -113,7 +113,7 @@ const LabModal = ({ isOpen, phase, onClose }) => {
             {animacionesDisponibles.map((anim) => (
               <button
                 key={anim.id}
-                onClick={() => handleAnimacionChange(anim.id)}
+                onClick={() => xwhandleAnimacionChange(anim.id)}
                 className="control-boton"
               >
                 {anim.nombre}

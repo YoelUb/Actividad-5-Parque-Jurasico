@@ -57,4 +57,5 @@ const DinoModal = ({ dino, onClose }) => {
     );
 };
 
+
 export default DinoModal;
