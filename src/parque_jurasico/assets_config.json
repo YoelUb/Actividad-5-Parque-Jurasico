@@ -1,7 +1,129 @@
 {
-    "jeepColor": "Black",
-    "carnivoreDino": "RedDino",
-    "herbivoreDino": "BlueDino",
-    "aviaryDino": "YellowDino",
-    "aquaDino": "DarkGreenDino"
+  "dinosaurios": [
+    {
+      "dino_id_str": "dino_001",
+      "nombre": "T-Rex",
+      "especie": "Tyrannosaurus Rex",
+      "dieta": "Carnívoro",
+      "descripcion": "El rey de los lagartos tiranos.",
+      "sprite_base_path": "/RedDino/RedDinosaur",
+      "animations": {
+        "idle": [1, 9],
+        "walk": [10, 18]
+      }
+    },
+    {
+      "dino_id_str": "dino_002",
+      "nombre": "Mosasaurus",
+      "especie": "Mosasaurus",
+      "dieta": "Piscívoro",
+      "descripcion": "Un reptil marino colosal.",
+      "sprite_base_path": "/marino/marino",
+      "animations": {
+        "idle": [1, 2],
+        "walk": [1, 2]
+      }
+    },
+    {
+      "dino_id_str": "dino_003",
+      "nombre": "Pteranodon",
+      "especie": "Pteranodon",
+      "dieta": "Carnívoro",
+      "descripcion": "Un reptil volador.",
+      "sprite_base_path": "/volador/volador",
+      "animations": {
+        "idle": [1, 12],
+        "walk": [1, 12]
+      }
+    },
+    {
+      "dino_id_str": "dino_004",
+      "nombre": "Triceratops",
+      "especie": "Triceratops",
+      "dieta": "Herbívoro",
+      "descripcion": "Un herbívoro pacífico con tres cuernos.",
+      "sprite_base_path": "/triceraptors/triceraptors",
+      "animations": {
+        "idle": [1, 4],
+        "walk": [1, 4]
+      }
+    },
+    {
+      "dino_id_str": "dino_005",
+      "nombre": "Brontosaurio",
+      "especie": "Brontosaurus",
+      "dieta": "Herbívoro",
+      "descripcion": "Un gigante amigable de cuello largo.",
+      "sprite_base_path": "/broncosaurio_azul/idle/broncosaurio",
+      "animations": {
+        "idle": [1, 12],
+        "walk": [14, 26]
+      }
+    },
+    {
+      "dino_id_str": "dino_006",
+      "nombre": "Spinosaurus",
+      "especie": "Spinosaurus",
+      "dieta": "Carnívoro",
+      "descripcion": "Un dinosaurio especial con una gran vela.",
+      "sprite_base_path": "/Dino_Especial/idle/Spino",
+      "animations": {
+        "idle": [1, 8],
+        "walk": [9, 12]
+      }
+    },
+    {
+      "dino_id_str": "dino_007",
+      "nombre": "T-Rex Azul",
+      "especie": "Tyrannosaurus Rex",
+      "dieta": "Carnívoro",
+      "descripcion": "El rey de los lagartos tiranos (Azul).",
+      "sprite_base_path": "/BlueDino/BlueDinosaur",
+      "animations": {
+        "idle": [1, 9],
+        "walk": [10, 18]
+      }
+    },
+    {
+      "dino_id_str": "dino_008",
+      "nombre": "T-Rex Verde Oscuro",
+      "especie": "Tyrannosaurus Rex",
+      "dieta": "Carnívoro",
+      "descripcion": "El rey de los lagartos tiranos (Verde Oscuro).",
+      "sprite_base_path": "/DarkGreenDino/DarkGreenDinosaur",
+      "animations": {
+        "idle": [1, 9],
+        "walk": [10, 18]
+      }
+    },
+    {
+      "dino_id_str": "dino_009",
+      "nombre": "T-Rex Amarillo",
+      "especie": "Tyrannosaurus Rex",
+      "dieta": "Carnívoro",
+      "descripcion": "El rey de los lagartos tiranos (Amarillo).",
+      "sprite_base_path": "/yellowDino/YellowDinosaur",
+      "animations": {
+        "idle": [1, 9],
+        "walk": [10, 18]
+      }
+    }
+  ],
+  "jeeps": [
+    {
+      "jeep_id_str": "jeep_001",
+      "color": "Green",
+      "sprite_path": "/Jeep/Jeep_Green/SEPARATED/Green_JEEP_CLEAN_All_0"
+    },
+    {
+      "jeep_id_str": "jeep_002",
+      "color": "Brown",
+      "sprite_path": "/Jeep/Jeep_Brown/SEPARATED/Brown_JEEP_CLEAN_All_0"
+    },
+    {
+      "jeep_id_str": "jeep_003",
+      "color": "Black",
+      "sprite_path": "/Jeep/Jeep_Black/SEPARATED/Black_JEEP_CLEAN_All_0"
+    }
+  ]
 }

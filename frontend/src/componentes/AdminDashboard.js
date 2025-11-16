@@ -188,7 +188,7 @@ const AdminDashboard = ({onSalirClick}) => {
                 setUsers(usersRes.data);
                 setLogs(logsRes.data);
 
-                const assetsRes = await axios.get(`${API_URL}/assets/config`, authHeaders);
+                const assetsRes = await axios.get(`${API_URL}/admin/configuracion/`, authHeaders);
                 const config = assetsRes.data;
 
                 setJeepColor(config.jeepColor || 'Green');
@@ -260,7 +260,7 @@ const AdminDashboard = ({onSalirClick}) => {
 
         try {
             const response = await axios.put(
-                `${API_URL}/assets/config`,
+                `${API_URL}/assets/configuracion`,
                 configData,
                 authHeaders
             );

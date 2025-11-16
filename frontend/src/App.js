@@ -42,7 +42,6 @@ function Aplicacion() {
   const [tokenLimitado, setTokenLimitado] = useState(null);
   const [emailParaVerificar, setEmailParaVerificar] = useState(null);
 
-  // CAMBIO AQUÍ → usar sessionStorage en lugar de localStorage
   const [mostrandoIntro, setMostrandoIntro] = useState(() => {
     return sessionStorage.getItem('haVistoIntro') === null;
   });
