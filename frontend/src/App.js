@@ -41,8 +41,10 @@ function Aplicacion() {
   const [pantallaAuth, setPantallaAuth] = useState('login');
   const [tokenLimitado, setTokenLimitado] = useState(null);
   const [emailParaVerificar, setEmailParaVerificar] = useState(null);
+
+  // CAMBIO AQUÍ → usar sessionStorage en lugar de localStorage
   const [mostrandoIntro, setMostrandoIntro] = useState(() => {
-    return localStorage.getItem('haVistoIntro') === null;
+    return sessionStorage.getItem('haVistoIntro') === null;
   });
 
   const helicopterAudioRef = useRef(null);
@@ -187,7 +189,7 @@ function Aplicacion() {
 
   const handleIntroTerminada = () => {
     setMostrandoIntro(false);
-    localStorage.setItem('haVistoIntro', 'true');
+    sessionStorage.setItem('haVistoIntro', 'true');
   };
 
   const irARegistro = () => setPantallaAuth('register');

@@ -78,7 +78,7 @@ async def create_default_data():
 
                 dino_001 = Dinosaurio(
                     dino_id_str="dino_001",
-                    nombre="T-Rex (Rojo)",
+                    nombre="T-Rex",
                     especie="Tyrannosaurus Rex",
                     dieta="Carnívoro",
                     descripcion="El rey de los lagartos tiranos.",
@@ -90,29 +90,30 @@ async def create_default_data():
                     dino_id_str="dino_002",
                     nombre="Mosasaurus",
                     especie="Mosasaurus",
-                    dieta="Carnívoro",
+                    dieta="Piscívoro",
                     descripcion="Un reptil marino colosal.",
-                    sprite_base_path=None, animations=None
+                    sprite_base_path="/marino/marino",
+                    animations={"idle": [1, 2], "walk": [1, 2]}
                 )
 
                 dino_003 = Dinosaurio(
                     dino_id_str="dino_003",
-                    nombre="Pteranodon (Amarillo)",
+                    nombre="Pteranodon",
                     especie="Pteranodon",
-                    dieta="Piscívoro",
+                    dieta="Carnívoro",
                     descripcion="Un reptil volador.",
-                    sprite_base_path="/yellowDino/YellowDinosaur",
-                    animations={"idle": [1, 9], "walk": [10, 18]}
+                    sprite_base_path="/volador/volador",
+                    animations={"idle": [1, 12], "walk": [1, 12]}
                 )
 
                 dino_004 = Dinosaurio(
                     dino_id_str="dino_004",
-                    nombre="Triceratops (Azul)",
+                    nombre="Triceratops",
                     especie="Triceratops",
                     dieta="Herbívoro",
                     descripcion="Un herbívoro pacífico con tres cuernos.",
-                    sprite_base_path="/BlueDino/BlueDinosaur",
-                    animations={"idle": [1, 9], "walk": [10, 18]}
+                    sprite_base_path="/triceraptors/triceraptors",
+                    animations={"idle": [1, 4], "walk": [1, 4]}
                 )
 
                 db.add_all([dino_001, dino_002, dino_003, dino_004])
