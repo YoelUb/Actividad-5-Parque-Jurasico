@@ -19,7 +19,7 @@ class AssetConfig(BaseModel):
 
 def get_config_path():
     """Obtiene la ruta al archivo de configuración en la raíz de 'src'"""
-    base_dir = Path(__file__).resolve().parent.parent.parent
+    base_dir = Path(__file__).resolve().parent.parent.parent.parent
     return base_dir / "assets_config.json"
 
 
@@ -27,41 +27,21 @@ def get_config_path():
 async def get_asset_config():
     """
     Obtiene la configuración de assets guardada.
-    Este endpoint es público para que el mapa (usuario) pueda leerlo.
+    MODIFICADO PARA DEBUG: Devuelve siempre el objeto por defecto
+    para evitar problemas de I/O con Docker en Mac.
     """
-    config_path = get_config_path()
-    if not config_path.exists():
+    print("--- DEBUG: Se está llamando a /api/assets/config ---")
 
-        default_config = {
-            "jeepColor": "Green",
-            "carnivoreDino": "RedDino",
-            "herbivoreDino": "triceratops",
-            "aviaryDino": "volador",
-            "aquaDino": "marino"
-        }
+    default_config = {
+        "jeepColor": "Green",
+        "carnivoreDino": "RedDino",
+        "herbivoreDino": "triceratops",
+        "aviaryDino": "volador",
+        "aquaDino": "marino"
+    }
 
-        try:
-            with open(config_path, "w") as f:
-                json.dump(default_config, f, indent=4)
-            return default_config
-        except IOError as e:
-            raise HTTPException(status_code=500, detail=f"No se pudo crear el archivo de configuración: {e}")
-
-    try:
-        with open(config_path, "r") as f:
-            config = json.load(f)
-
-        if "herbivoreDinoSecundario" in config:
-            del config["herbivoreDinoSecundario"]
-
-        config["aviaryDino"] = "volador"
-        config["aquaDino"] = "marino"
-
-        return config
-    except IOError as e:
-        raise HTTPException(status_code=500, detail=f"No se pudo leer el archivo de configuración: {e}")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Error al decodificar el archivo de configuración.")
+    print(f"--- DEBUG: Devolviendo config: {default_config} ---")
+    return default_config
 
 
 @router.put("/config", status_code=200)

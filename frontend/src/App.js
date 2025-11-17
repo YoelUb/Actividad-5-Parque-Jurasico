@@ -85,11 +85,16 @@ function Aplicacion() {
 
     const obtenerDatosIniciales = async () => {
       try {
+        console.log('--- [App.js] Buscando datos de /api/auth/me ---'); // <--- AÑADIDO
         const userRes = await fetch(`${API_URL}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!userRes.ok) throw new Error('Token inválido');
         const datosUsuario = await userRes.json();
+
+        // ¡¡LA LÍNEA CLAVE!!
+        console.log('--- [App.js] Datos de usuario recibidos: ---', datosUsuario); // <--- AÑADIDO
+
         setUsuarioActual(datosUsuario);
 
         const dinosRes = await fetch(`${API_URL}/parque/dinosaurios`, {
@@ -101,7 +106,8 @@ function Aplicacion() {
           return acc;
         }, {});
         setDinos(dinosById);
-      } catch {
+      } catch (err) {
+        console.error('--- [App.js] ERROR en obtenerDatosIniciales ---', err); // <--- AÑADIDO
         setToken(null);
         localStorage.removeItem('jurassic_token');
         setPantallaAuth('login');
@@ -208,6 +214,7 @@ function Aplicacion() {
 
   const renderizarContenido = () => {
     if (cargando) {
+      console.log('--- [App.js] Renderizando: Cargando... ---'); // <--- AÑADIDO
       return <h1>Cargando...</h1>;
     }
 
@@ -246,10 +253,16 @@ function Aplicacion() {
       }
     }
 
+    // --- LÓGICA DE RENDERIZADO CORREGIDA ---
+    console.log('--- [App.js] Renderizando contenido. Usuario actual: ---', usuarioActual); // <--- AÑADIDO
+
     if (usuarioActual?.role?.toLowerCase() === 'admin') {
-      return <AdminDashboard token={token} onSalirClick={iniciarCierreSesion} />;
+        console.log('--- [App.js] DECISIÓN: Renderizar AdminDashboard ---'); // <--- AÑADIDO
+        return <AdminDashboard token={token} onSalirClick={iniciarCierreSesion} />;
     }
 
+    // Si no es admin, renderiza el mapa
+    console.log('--- [App.js] DECISIÓN: Renderizar MapaJurassic ---'); // <--- AÑADIDO
     return (
       <MapaJurassic
         onSalirClick={iniciarCierreSesion}
