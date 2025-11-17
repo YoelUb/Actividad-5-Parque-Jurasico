@@ -1,3 +1,4 @@
+/* Comentario Version anterior*/
 import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
@@ -60,6 +61,12 @@ const AdminDashboard = ({onSalirClick}) => {
 
     const [loading, setLoading] = useState(true);
 
+
+    const [users, setUsers] = useState([]);
+    const [logs, setLogs] = useState([]);
+    const [error, setError] = useState(null);
+
+
     const token = localStorage.getItem('jurassic_token');
 
     const authHeaders = useMemo(
@@ -76,18 +83,20 @@ const AdminDashboard = ({onSalirClick}) => {
             ]);
 
             const cfg = assetsRes.data;
-
             setJeepColor(cfg.jeepColor);
             setCarnivoreDino(cfg.carnivoreDino);
             setHerbivoreDino(cfg.herbivoreDino);
 
+            setUsers(usersRes.data);
+            setLogs(logsRes.data);
+
         } catch (err) {
             console.error(err);
+            setError(err.message);
         } finally {
             setLoading(false);
         }
     }, [authHeaders]);
-
     useEffect(() => {
         if (token) fetchData();
     }, [token, fetchData]);
@@ -182,6 +191,58 @@ const AdminDashboard = ({onSalirClick}) => {
                 <button className="save-assets-btn" onClick={handleAssetSave}>
                     Guardar Cambios
                 </button>
+            </div>
+            <div className="admin-data-section">
+                {error && <div className="admin-error">Error: {error}</div>}
+
+                <div className="admin-data-list">
+                    <h2>Usuarios Registrados</h2>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username (Email)</th>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>Activo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {users.map(user => (
+                            <tr key={user.id}>
+                                <td>{user.id}</td>
+                                <td>{user.username}</td>
+                                <td>{user.nombre} {user.apellidos}</td>
+                                <td>{user.role}</td>
+                                <td>{user.is_active ? 'Sí' : 'No'}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="admin-data-list">
+                    <h2>Logs de Marketing</h2>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Admin</th>
+                            <th>Emails Enviados</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {logs.map(log => (
+                            <tr key={log.id}>
+                                {/* El backend envía el timestamp */}
+                                <td>{new Date(log.timestamp).toLocaleString()}</td>
+                                <td>{log.admin_username}</td>
+                                <td>{log.destinatarios_count}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Modales */}
