@@ -1,4 +1,3 @@
-/* Comentario Version anterior*/
 import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
@@ -97,6 +96,7 @@ const AdminDashboard = ({onSalirClick}) => {
             setLoading(false);
         }
     }, [authHeaders]);
+
     useEffect(() => {
         if (token) fetchData();
     }, [token, fetchData]);
@@ -118,6 +118,29 @@ const AdminDashboard = ({onSalirClick}) => {
             alert("Error al guardar configuración.");
         }
     };
+
+    const handleSendCampaign = async () => {
+        if (!window.confirm("¿Estás seguro de que quieres enviar la campaña de email masivo a todos los usuarios?")) {
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `${API_URL}/admin/enviar-publicidad`,
+                {},
+                authHeaders
+            );
+
+            const count = response.data.destinatarios_count || 'N/A';
+            alert(`¡Campaña enviada con éxito a ${count} usuarios!`);
+            fetchData();
+
+        } catch (err) {
+            console.error("Error al enviar campaña:", err);
+            alert("Error al enviar la campaña. Revisa la consola.");
+        }
+    };
+
 
     if (loading) return <div className="admin-loading">Cargando...</div>;
 
@@ -221,6 +244,15 @@ const AdminDashboard = ({onSalirClick}) => {
                     </table>
                 </div>
 
+                <div style={{margin: '1rem 0', textAlign: 'center'}}>
+                    <button
+                        className="email-campaign-btn"
+                        onClick={handleSendCampaign}
+                    >
+                        Enviar Campaña de Publicidad Masiva
+                    </button>
+                </div>
+
                 <div className="admin-data-list">
                     <h2>Logs de Marketing</h2>
                     <table>
@@ -234,7 +266,6 @@ const AdminDashboard = ({onSalirClick}) => {
                         <tbody>
                         {logs.map(log => (
                             <tr key={log.id}>
-                                {/* El backend envía el timestamp */}
                                 <td>{new Date(log.timestamp).toLocaleString()}</td>
                                 <td>{log.admin_username}</td>
                                 <td>{log.destinatarios_count}</td>

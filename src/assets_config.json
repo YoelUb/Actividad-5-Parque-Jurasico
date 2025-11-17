@@ -1,7 +1,7 @@
 {
     "jeepColor": "Brown",
-    "carnivoreDino": "Dino_Especial",
-    "herbivoreDino": "broncosaurio_azul",
+    "carnivoreDino": "RedDino",
+    "herbivoreDino": "triceratops",
     "aviaryDino": "volador",
     "aquaDino": "marino"
 }

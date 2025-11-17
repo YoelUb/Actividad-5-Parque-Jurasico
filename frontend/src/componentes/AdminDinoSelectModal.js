@@ -10,6 +10,11 @@ const AdminDinoSelectModal = ({ isOpen, onClose, onSelectDino, dinoOptions, titl
         onClose();
     };
 
+    const handleSelect = (dinoValue) => {
+        onSelectDino(dinoValue);
+        onClose();
+    };
+
     return (
         <div className="modal-backdrop" onClick={handleBackdropClick}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -24,7 +29,7 @@ const AdminDinoSelectModal = ({ isOpen, onClose, onSelectDino, dinoOptions, titl
                         <div
                             key={dino.value}
                             className="dino-option-card"
-                            onClick={() => onSelectDino(dino.value)}
+                            onClick={() => handleSelect(dino.value)}
                         >
                             <img src={dino.previewPath} alt={dino.label} />
                             <span>{dino.label}</span>
