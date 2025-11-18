@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Auth.css';
 import './Registro.css';
 
 const API_URL = 'http://localhost:8000/api';
 
-function ForceChangePassword({ token, onPasswordChanged }) {
+function ForceChangePassword() {
   const [formData, setFormData] = useState({
     new_username: '',
     new_password: '',
@@ -16,6 +17,10 @@ function ForceChangePassword({ token, onPasswordChanged }) {
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+  const token = location.state?.token;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -25,7 +30,6 @@ function ForceChangePassword({ token, onPasswordChanged }) {
     e.preventDefault();
     setError(null);
 
-    // Regex simple para validación de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formData.new_username) {
@@ -47,6 +51,11 @@ function ForceChangePassword({ token, onPasswordChanged }) {
       return;
     }
 
+    if (!token) {
+        setError('Token de autorización no encontrado. Vuelve a iniciar sesión.');
+        return;
+    }
+
     setCargando(true);
     try {
       const respuesta = await fetch(`${API_URL}/auth/force-change-password`, {
@@ -66,7 +75,8 @@ function ForceChangePassword({ token, onPasswordChanged }) {
         throw new Error(errData.detail || 'Error al cambiar la contraseña');
       }
 
-      onPasswordChanged();
+      alert('Contraseña cambiada. Por favor, inicia sesión de nuevo.');
+      navigate('/login');
 
     } catch (err) {
       setError(err.message);

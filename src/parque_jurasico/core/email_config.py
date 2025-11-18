@@ -253,3 +253,50 @@ async def enviar_correos_publicidad(destinatarios: List[str], asunto: str, cuerp
             print(f"Correo de publicidad enviado a {email_to}")
         except Exception as e:
             print(f"Error al enviar correo de publicidad a {email_to}: {e}")
+
+def create_password_reset_email_template(reset_url: str, nombre_usuario: str) -> str:
+    """
+    Crea la plantilla de correo para el reseteo de contraseña.
+    """
+    html_content = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: 'Arial', sans-serif; line-height: 1.6; }}
+            .container {{ width: 90%; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
+            .header {{ font-size: 24px; color: #d9534f; }}
+            .content {{ margin-top: 20px; }}
+            .button {{
+                display: inline-block;
+                padding: 10px 20px;
+                margin: 20px 0;
+                background-color: #d9534f;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }}
+            .footer {{ margin-top: 20px; font-size: 12px; color: #888; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">Solicitud de Reseteo de Contraseña</div>
+            <div class="content">
+                <p>Hola, {nombre_usuario},</p>
+                <p>Recibimos una solicitud para reestablecer la contraseña de tu cuenta en Jurassic Park.</p>
+                <p>Si no has sido tú, por favor ignora este correo.</p>
+                <p>Para reestablecer tu contraseña, haz clic en el siguiente botón:</p>
+                <a href="{reset_url}" class="button" style="color: #ffffff;">Reestablecer Contraseña</a>
+                <p>Este enlace expirará en 15 minutos.</p>
+                <p>Si tienes problemas con el botón, copia y pega la siguiente URL en tu navegador:</p>
+                <p><a href="{reset_url}">{reset_url}</a></p>
+            </div>
+            <div class="footer">
+                <p>&copy; Jurassic Park. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return html_content

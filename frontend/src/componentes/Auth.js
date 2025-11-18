@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 import './Registro.css';
 
 const API_URL = 'http://localhost:8000/api';
 
-function Autenticacion({ enLoginExitoso, onNavigateToRegister, onForceChangePassword }) {
+function Autenticacion({ enLoginExitoso }) {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // <-- 1. Estado añadido
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
+  const navigate = useNavigate();
 
   const manejarSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +36,7 @@ function Autenticacion({ enLoginExitoso, onNavigateToRegister, onForceChangePass
       }
 
       if (data.must_change_password) {
-        onForceChangePassword(data.access_token);
+        navigate('/force-change-password', { state: { token: data.access_token } });
       } else {
         enLoginExitoso(data.access_token);
       }
@@ -81,12 +83,18 @@ function Autenticacion({ enLoginExitoso, onNavigateToRegister, onForceChangePass
         </button>
       </form>
 
+      <div className="auth-links" style={{ textAlign: 'center', marginTop: '1rem' }}>
+        <Link to="/solicitar-reset" className="link-button">
+            ¿Olvidaste tu contraseña?
+        </Link>
+      </div>
+
       <div className="auth-switch">
         <p>
             ¿No tienes cuenta?{' '}
-            <button onClick={onNavigateToRegister} className="link-button">
+            <Link to="/registro" className="link-button">
                 Regístrate aquí
-            </button>
+            </Link>
         </p>
       </div>
     </div>

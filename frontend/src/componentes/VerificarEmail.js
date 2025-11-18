@@ -1,74 +1,103 @@
 import React, { useState } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import './VerificarEmail.css';
+import './Auth.css';
 
 const API_URL = 'http://localhost:8000/api';
 
-function VerificarEmail({ email, onVerificationSuccess }) {
-  const [token, setToken] = useState('');
+function VerificarEmail() {
+  const [code, setCode] = useState('');
   const [error, setError] = useState(null);
-  const [cargando, setCargando] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = async (e) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email || '';
+
+  const handleVerification = async (e) => {
     e.preventDefault();
     setError(null);
+    setLoading(true);
 
-    if (token.length !== 6 || !/^\d+$/.test(token)) {
-      setError('El código debe ser de 6 dígitos numéricos.');
-      return;
-    }
-
-    setCargando(true);
     try {
-      const respuesta = await fetch(`${API_URL}/auth/verify-email`, {
+      const response = await fetch(`${API_URL}/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email,
-          code: token,
-        }),
+        body: JSON.stringify({ email: email, code: code }),
       });
 
-      const data = await respuesta.json();
+      const data = await response.json();
 
-      if (!respuesta.ok) {
+      if (!response.ok) {
         throw new Error(data.detail || 'Error al verificar el código');
       }
 
-      onVerificationSuccess();
+      setMessage(data.message || '¡Correo verificado exitosamente!');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
 
     } catch (err) {
       setError(err.message);
-    } finally {
-      setCargando(false);
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError(null);
+    setMessage('Reenviando código...');
+
+    try {
+      // Esta función requiere un endpoint de backend que no está en el proyecto original.
+      // Dejamos el error temporal.
+      throw new Error('Función de reenvío no implementada todavía.');
+      // setMessage('¡Código reenviado! Revisa tu correo.');
+
+    } catch (err) {
+      setError(err.message);
+      setMessage('');
     }
   };
 
   return (
-    <div className="auth-container">
-      <h2>Verificar Cuenta</h2>
-      <p className="verify-text">
-        Se ha enviado un código de 6 dígitos a <strong>{email}</strong>.
-      </p>
-      <p className="verify-text">Revisa tu bandeja de entrada (y spam).</p>
+    <div className="auth-container verify-container">
+      <h2>Verifica tu Correo Electrónico</h2>
+      <p>Hemos enviado un código de verificación a:</p>
+      <p><strong>{email || 'tu correo'}</strong></p>
+      <p>Por favor, introduce el código para activar tu cuenta.</p>
 
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleVerification}>
         <input
           type="text"
-          name="token"
-          placeholder="Código de 6 dígitos"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          maxLength={6}
+          placeholder="Código de Verificación"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
           required
-          className="token-input"
+          className="verification-code-input"
         />
 
         {error && <p className="error">{error}</p>}
+        {message && <p className="success-message">{message}</p>}
 
-        <button type="submit" disabled={cargando}>
-          {cargando ? 'Verificando...' : 'Activar Cuenta'}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Verificando...' : 'Verificar Cuenta'}
         </button>
       </form>
+
+      <div className="auth-switch">
+        <p>
+          ¿No recibiste el código?{' '}
+          <button onClick={handleResend} className="link-button">
+            Reenviar código
+          </button>
+        </p>
+        <p>
+          <Link to="/login" className="link-button">
+            Volver a Iniciar Sesión
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

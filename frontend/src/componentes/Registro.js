@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Registro.css';
 
 const API_URL = 'http://localhost:8000/api';
 
-function Registro({ onRegistroExitoso }) {
+function Registro() {
     const [formData, setFormData] = useState({
         nombre: '',
         apellidos: '',
@@ -15,6 +16,7 @@ function Registro({ onRegistroExitoso }) {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(null);
     const [cargando, setCargando] = useState(false);
+    const navigate = useNavigate();
 
     const PASSWORD_POLICY_ERROR = "Contraseña T-Rex: Mín. 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 símbolo (!@#$%^&*())";
 
@@ -84,7 +86,7 @@ function Registro({ onRegistroExitoso }) {
                 throw new Error(data.detail || 'Error al registrar el usuario');
             }
 
-            onRegistroExitoso(formData.email);
+            navigate('/verificar-email', { state: { email: formData.email } });
 
         } catch (err) {
             setError(err.message);
@@ -171,6 +173,15 @@ function Registro({ onRegistroExitoso }) {
                     {cargando ? 'Registrando...' : 'Crear Cuenta'}
                 </button>
             </form>
+
+            <div className="auth-switch">
+                <p>
+                    ¿Ya tienes cuenta?{' '}
+                    <Link to="/login" className="link-button">
+                        Inicia sesión aquí
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 }
