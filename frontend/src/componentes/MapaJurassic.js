@@ -26,11 +26,13 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
 
     const scaleAvg = (scaleX + scaleY) / 2;
     const scaledRadius = point.r * scaleAvg;
+    const scaledX = point.x * scaleX;
+    const scaledY = point.y * scaleY;
 
     const handleMouseEnter = (e) => {
         onHover(true, {
-            x: (point.x * scaleX) + scaledRadius + 5,
-            y: point.y * scaleY,
+            x: scaledX + scaledRadius + 5,
+            y: scaledY,
             text: point.name
         });
         setIsHovered(true);
@@ -45,10 +47,24 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
         if (stage) stage.content.style.cursor = 'default';
     };
 
+    const handleClick = (e) => {
+        if (point.name === "Puerta" && onSalirClick) {
+            onSalirClick();
+        } else if (point.dinoId && onDinoSelect) {
+            onDinoSelect(point.dinoId);
+        } else if (point.name === "Helipuerto" && onHelipuertoClick) {
+            onHelipuertoClick();
+        } else if (point.name === "Coche" && onCocheClick) {
+            onCocheClick();
+        } else if (point.name === "Guardas" && onGuardasClick) {
+            onGuardasClick();
+        }
+    };
+
     return (
         <Circle
-            x={point.x * scaleX}
-            y={point.y * scaleY}
+            x={scaledX}
+            y={scaledY}
             radius={isHovered ? scaledRadius * 1.2 : scaledRadius}
             fill="#ff4136"
             stroke="#ffffff"
@@ -57,22 +73,7 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
             shadowColor="black"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-
-            onClick={() => {
-                if (point.name === "Puerta" && onSalirClick) {
-                    onSalirClick();
-                } else if (point.dinoId && onDinoSelect) {
-                    onDinoSelect(point.dinoId);
-                } else if (point.name === "Helipuerto" && onHelipuertoClick) {
-                    onHelipuertoClick();
-                } else if (point.name === "Coche" && onCocheClick) {
-                    onCocheClick();
-                } else if (point.name === "Guardas" && onGuardasClick) {
-                    onGuardasClick();
-                } else {
-                    console.log(`Clic en: ${point.name} (sin acción)`);
-                }
-            }}
+            onClick={handleClick}
         />
     );
 };
@@ -81,6 +82,7 @@ const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick, onCocheCl
     const wrapperRef = useRef(null);
     const [size, setSize] = useState({width: ORIGINAL_WIDTH, height: ORIGINAL_HEIGHT});
     const [tooltip, setTooltip] = useState(null);
+    const [scale, setScale] = useState(1);
 
     useEffect(() => {
         const updateSize = () => {
@@ -91,16 +93,22 @@ const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick, onCocheCl
                     window.innerHeight * 0.9
                 );
 
+                const newScale = containerWidth / ORIGINAL_WIDTH;
+
                 setSize({
                     width: containerWidth,
                     height: containerHeight
                 });
+                setScale(newScale);
             }
         };
 
         updateSize();
         window.addEventListener('resize', updateSize);
-        return () => window.removeEventListener('resize', updateSize);
+
+        return () => {
+            window.removeEventListener('resize', updateSize);
+        };
     }, []);
 
     const handlePointHover = (isVisible, data) => {

@@ -4,103 +4,260 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
-  background: rgba(40, 40, 40, 0.95);
-  padding: 25px;
-  border-radius: 12px;
-  border: 1px solid #444;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+  padding: 30px;
+  border-radius: 16px;
+  border: 2px solid #d4af37;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 175, 55, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   width: 90%;
-  max-width: 550px;
+  max-width: 600px;
   position: relative;
-  color: #f4f4f4;
+  color: #f8f8f8;
+  animation: slideUp 0.4s ease-out;
+  font-family: 'Special Elite', cursive;
 }
 
 .dino-modal h2 {
-  color: #ff4136;
+  color: #d4af37;
   margin-top: 0;
-  border-bottom: 2px solid #ff4136;
-  padding-bottom: 10px;
-  font-size: 2rem;
+  border-bottom: 2px solid #d4af37;
+  padding-bottom: 12px;
+  font-size: 2.2rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
 }
 
 .dino-modal p {
   font-size: 1.1rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #e8e8e8;
+}
+
+.dino-modal strong {
+  color: #d4af37;
+  font-weight: 700;
 }
 
 .dino-modal .descripcion {
   font-style: italic;
-  color: #ccc;
-  margin-top: 15px;
+  color: #b8b8b8;
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 3px solid #d4af37;
+  border-radius: 4px;
+  line-height: 1.5;
 }
 
 .anim-container {
   width: 100%;
-  height: 200px;
+  height: 220px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #1a1a1a;
-  border-radius: 8px;
-  margin: 20px 0;
-  border: 1px solid #333;
+  background: black;
+  border-radius: 12px;
+  margin: 25px 0;
+  border: 3px solid #d4af37;
   overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .anim-controls {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .anim-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  margin: 0 8px;
-  border-radius: 5px;
+  background: linear-gradient(145deg, #444 0%, #333 100%);
+  color: #fff;
+  border: 2px solid #555;
+  padding: 12px 20px;
+  margin: 0 10px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-family: 'Special Elite', cursive;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 120px;
 }
 
 .anim-button:hover {
-  background-color: #0056b3;
-  transform: translateY(-2px);
+  background: linear-gradient(145deg, #555 0%, #444 100%);
+  border-color: #d4af37;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
 }
 
 .anim-button.active {
-  background-color: #004a99;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+  background: linear-gradient(145deg, #d4af37 0%, #b8941f 100%);
+  color: #1a1a1a;
+  border-color: #d4af37;
+  box-shadow:
+    0 0 20px rgba(212, 175, 55, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   font-weight: bold;
 }
 
 .modal-close-button {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent;
-  border: none;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #555;
   color: #aaa;
-  font-size: 2.5rem;
-  font-weight: 100;
+  font-size: 2rem;
+  font-weight: 300;
   line-height: 1;
-  padding: 0;
+  padding: 5px 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-close-button:hover {
-  color: #ff4136;
-  transform: scale(1.2);
+  background: rgba(212, 175, 55, 0.2);
+  border-color: #d4af37;
+  color: #d4af37;
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Estados de error o sin animación */
+.dino-modal p:last-child {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px dashed #444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 25px 20px;
+    margin: 20px;
+    max-width: calc(100% - 40px);
+  }
+
+  .dino-modal h2 {
+    font-size: 1.8rem;
+  }
+
+  .anim-container {
+    height: 180px;
+  }
+
+  .anim-button {
+    padding: 10px 16px;
+    margin: 0 5px;
+    min-width: 110px;
+    font-size: 0.9rem;
+  }
+
+  .modal-close-button {
+    top: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 20px 15px;
+  }
+
+  .dino-modal h2 {
+    font-size: 1.6rem;
+  }
+
+  .anim-container {
+    height: 160px;
+  }
+
+  .anim-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .anim-button {
+    margin: 0;
+    width: 100%;
+  }
+}
+
+.info-message {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.info-message p {
+  color: #d4af37;
+  margin: 0;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+.dino-modal p strong {
+  color: #d4af37;
+}
+
+.anim-container:only-child {
+  margin-bottom: 0;
 }

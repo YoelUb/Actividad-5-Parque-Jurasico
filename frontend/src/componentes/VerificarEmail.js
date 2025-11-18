@@ -73,9 +73,9 @@ function VerificarEmail() {
   return (
     <div className="auth-container verify-container">
       <h2>Verifica tu Correo Electrónico</h2>
-      <p>Hemos enviado un código de verificación a:</p>
-      <p><strong>{email || 'tu correo'}</strong></p>
-      <p>Por favor, introduce el código para activar tu cuenta.</p>
+      <p className="verify-text">Hemos enviado un código de verificación a:</p>
+      <p className="verify-text"><strong>{email || 'tu correo'}</strong></p>
+      <p className="verify-text">Por favor, introduce el código para activar tu cuenta.</p>
 
       <form onSubmit={handleVerification}>
         <input
@@ -84,13 +84,17 @@ function VerificarEmail() {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           required
-          className="verification-code-input"
+          className="token-input"
         />
 
-        {error && <p className="error">{error}</p>}
+        {error && <p className="error-message">{error}</p>}
         {message && <p className="success-message">{message}</p>}
 
-        <button type="submit" disabled={loading}>
+        <button
+          type="submit"
+          disabled={loading}
+          className="verify-button"
+        >
           {loading ? 'Verificando...' : 'Verificar Cuenta'}
         </button>
       </form>
@@ -98,12 +102,12 @@ function VerificarEmail() {
       <div className="auth-switch">
         <p>
           ¿No recibiste el código?{' '}
-          <button onClick={handleResend} className="link-button">
+          <button onClick={handleResend} className="resend-button">
             Reenviar código
           </button>
         </p>
         <p>
-          <Link to="/login" className="link-button">
+          <Link to="/login" className="back-button">
             Volver a Iniciar Sesión
           </Link>
         </p>
