@@ -9,8 +9,8 @@ from ...modelos import dinosaurio as modelos
 from ...modelos.dinosaurio import Usuario as UsuarioDBModel
 from ...core import email_config
 from datetime import timedelta, datetime, timezone
-from jose import JWTError, jwt  # <-- AÑADIDO
-from pydantic import BaseModel, EmailStr  # <-- AÑADIDO
+from jose import JWTError, jwt
+from pydantic import BaseModel, EmailStr
 
 router = APIRouter()
 
@@ -283,3 +283,60 @@ async def perform_password_reset(
     await db.commit()
 
     return {"mensaje": "Contraseña actualizada exitosamente."}
+
+
+@router.post("/resend-verification-code")
+async def resend_verification_code(
+        data: modelos.VerificationRequest,
+        background_tasks: BackgroundTasks,
+        db: AsyncSession = Depends(get_db_session)
+):
+    result = await db.execute(select(UsuarioDBModel).where(UsuarioDBModel.username == data.email))
+    usuario = result.scalars().first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if usuario.is_active:
+        return {"message": "Esta cuenta ya está verificada."}
+
+    query = select(modelos.EmailVerificationToken). \
+        where(modelos.EmailVerificationToken.user_id == usuario.id). \
+        order_by(modelos.EmailVerificationToken.expires_at.desc())
+
+    result = await db.execute(query)
+    ultimo_token = result.scalars().first()
+
+    if ultimo_token:
+        tiempo_restante = ultimo_token.expires_at - datetime.now(timezone.utc)
+        if tiempo_restante > timedelta(minutes=5):
+            minutos_espera = int((tiempo_restante.total_seconds() / 60) - 5)
+            if minutos_espera < 1: minutos_espera = 1
+            raise HTTPException(
+                status_code=429,
+                detail=f"Por favor espera {minutos_espera} minutos antes de solicitar otro código."
+            )
+
+    verification_code = email_config.generate_verification_code()
+    token_db = modelos.EmailVerificationToken(
+        token=verification_code,
+        user_id=usuario.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=20)
+    )
+    db.add(token_db)
+    await db.commit()
+
+    html_content = email_config.create_jurassic_park_email_template(
+        code=verification_code,
+        nombre_usuario=usuario.nombre
+    )
+
+    message = email_config.MessageSchema(
+        subject="Nuevo código de verificación - Jurassic Park",
+        recipients=[usuario.username],
+        body=html_content,
+        subtype=email_config.MessageType.html
+    )
+    background_tasks.add_task(email_config.fm.send_message, message)
+
+    return {"message": "Nuevo código enviado. Revisa tu correo."}

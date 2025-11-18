@@ -40,19 +40,29 @@ function VerificarEmail() {
 
     } catch (err) {
       setError(err.message);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
     setError(null);
-    setMessage('Reenviando código...');
+    setMessage('Solicitando reenvío...');
 
     try {
-      // Esta función requiere un endpoint de backend que no está en el proyecto original.
-      // Dejamos el error temporal.
-      throw new Error('Función de reenvío no implementada todavía.');
-      // setMessage('¡Código reenviado! Revisa tu correo.');
+      const response = await fetch(`${API_URL}/auth/resend-verification-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, code: "RESEND" }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Error al reenviar código');
+      }
+
+      setMessage('¡Nuevo código enviado! Revisa tu correo.');
 
     } catch (err) {
       setError(err.message);
