@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from pathlib import Path
 from ...security.seguridad import get_current_active_admin
@@ -9,7 +9,9 @@ router = APIRouter()
 
 
 class AssetConfig(BaseModel):
-    """Modelo Pydantic actualizado. 'herbivoreDinoSecundario' eliminado."""
+    """
+    Define la estructura de datos para la configuración de activos del parque.
+    """
     jeepColor: str
     carnivoreDino: str
     herbivoreDino: str
@@ -17,31 +19,36 @@ class AssetConfig(BaseModel):
     aquaDino: str
 
 
-def get_config_path():
-    """Obtiene la ruta al archivo de configuración en la raíz de 'src'"""
+def get_config_path() -> Path:
+    """
+    Calcula la ruta absoluta del archivo assets_config.json.
+    Sube 4 niveles desde la ubicación del archivo actual para llegar a la raíz de la aplicación (asumiendo
+    una estructura src/parque_jurasico/api/routers/assets_router.py).
+    """
     base_dir = Path(__file__).resolve().parent.parent.parent.parent
     return base_dir / "assets_config.json"
+
 
 
 @router.get("/config", response_model=AssetConfig)
 async def get_asset_config():
     """
-    Obtiene la configuración de assets guardada.
-    MODIFICADO PARA DEBUG: Devuelve siempre el objeto por defecto
-    para evitar problemas de I/O con Docker en Mac.
+    Obtiene la configuración de assets guardada del archivo JSON.
+    Si el archivo no existe o falla la lectura, devuelve la configuración por defecto.
     """
-    print("--- DEBUG: Se está llamando a /api/assets/config ---")
+    config_path = get_config_path()
 
-    default_config = {
-        "jeepColor": "Green",
-        "carnivoreDino": "RedDino",
-        "herbivoreDino": "triceratops",
-        "aviaryDino": "volador",
-        "aquaDino": "marino"
-    }
-
-    print(f"--- DEBUG: Devolviendo config: {default_config} ---")
-    return default_config
+    try:
+        with open(config_path, "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {
+            "jeepColor": "Green",
+            "carnivoreDino": "RedDino",
+            "herbivoreDino": "triceratops",
+            "aviaryDino": "volador",
+            "aquaDino": "marino"
+        }
 
 
 @router.put("/config", status_code=200)
@@ -50,12 +57,17 @@ async def update_asset_config(
         admin: Usuario = Depends(get_current_active_admin)
 ):
     """
-    Actualiza la configuración de assets. Requiere ser admin.
+    Actualiza la configuración de assets en el archivo JSON. Requiere autenticación de administrador.
     """
     config_path = get_config_path()
+
+
     try:
         with open(config_path, "w") as f:
             json.dump(config.dict(), f, indent=4)
         return {"message": "Configuración de assets guardada con éxito"}
     except IOError as e:
-        raise HTTPException(status_code=500, detail=f"No se pudo escribir en el archivo de configuración: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"No se pudo escribir en el archivo de configuración: {e}"
+        )

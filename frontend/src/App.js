@@ -16,19 +16,9 @@ import SolicitarReset from './componentes/RequestPasswordReset';
 import EjecutarReset from './componentes/ResetPassword';
 import './App.css';
 
+import {LOCATIONS} from './componentes/config/locations';
 
 const API_URL = 'http://localhost:8000/api';
-
-const locations = [
-    {"name": "Recinto Carnívoros", "x": 236, "y": 290, "r": 8, "dinoId": "dino_001"},
-    {"name": "Recinto Herbívoros", "x": 334, "y": 374, "r": 8, "dinoId": "dino_004"},
-    {"name": "Recinto Aviario", "x": 500, "y": 438, "r": 8, "dinoId": "dino_003"},
-    {"name": "Puerta", "x": 857, "y": 620, "r": 8},
-    {"name": "Coche", "x": 608, "y": 658, "r": 8},
-    {"name": "Recinto Acuario", "x": 862, "y": 159, "r": 8, "dinoId": "dino_002"},
-    {"name": "Guardas", "x": 484, "y": 336, "r": 8},
-    {"name": "Helipuerto", "x": 575, "y": 175, "r": 8},
-];
 
 function Aplicacion() {
     const [token, setToken] = useState(localStorage.getItem('jurassic_token'));
@@ -36,7 +26,8 @@ function Aplicacion() {
     const [cargando, setCargando] = useState(true);
     const [modalAbierto, setModalAbierto] = useState(false);
     const [dinoSeleccionado, setDinoSeleccionado] = useState(null);
-    const [dinos, setDinos] = useState({});
+    const [dinos, setDinos] = useState([]);
+    const [assetConfig, setAssetConfig] = useState(null);
     const [labModalAbierto, setLabModalAbierto] = useState(false);
     const [labModalPhase, setLabModalPhase] = useState('helicopter');
     const [jeepModalAbierto, setJeepModalAbierto] = useState(false);
@@ -64,6 +55,7 @@ function Aplicacion() {
     const manejarCierreSesion = useCallback(() => {
         setToken(null);
         setUsuarioActual(null);
+        setAssetConfig(null);
         localStorage.removeItem('jurassic_token');
         setModalAbierto(false);
         setDinoSeleccionado(null);
@@ -77,42 +69,51 @@ function Aplicacion() {
         setModalAbierto(true);
     };
 
-    useEffect(() => {
+    const obtenerDatosIniciales = useCallback(async () => {
         if (!token) {
             setCargando(false);
             return;
         }
 
-        const obtenerDatosIniciales = async () => {
-            try {
-                const userRes = await fetch(`${API_URL}/auth/me`, {
-                    headers: {Authorization: `Bearer ${token}`},
-                });
-                if (!userRes.ok) throw new Error('Token inválido');
-                const datosUsuario = await userRes.json();
+        try {
+            setCargando(true);
 
-                setUsuarioActual(datosUsuario);
+            const userRes = await fetch(`${API_URL}/auth/me`, {
+                headers: {Authorization: `Bearer ${token}`},
+            });
+            if (!userRes.ok) throw new Error('Token inválido');
+            const datosUsuario = await userRes.json();
+            setUsuarioActual(datosUsuario);
 
-                const dinosRes = await fetch(`${API_URL}/parque/dinosaurios`, {
-                    headers: {Authorization: `Bearer ${token}`},
-                });
-                const allDinos = await dinosRes.json();
-                const dinosById = allDinos.reduce((acc, dino) => {
-                    acc[dino.dino_id_str] = dino;
-                    return acc;
-                }, {});
-                setDinos(dinosById);
-            } catch (err) {
-                setToken(null);
-                localStorage.removeItem('jurassic_token');
-                navigate('/login');
-            } finally {
-                setCargando(false);
+            const assetsRes = await fetch(`${API_URL}/assets/config`, {
+                headers: {Authorization: `Bearer ${token}`},
+            });
+            if (assetsRes.ok) {
+                const configData = await assetsRes.json();
+                setAssetConfig(configData);
             }
-        };
 
-        obtenerDatosIniciales();
+            const dinosRes = await fetch(`${API_URL}/parque/dinosaurios`, {
+                headers: {Authorization: `Bearer ${token}`},
+            });
+            if (dinosRes.ok) {
+                const allDinos = await dinosRes.json();
+                setDinos(allDinos);
+            }
+
+        } catch (err) {
+            console.error('Error cargando datos:', err);
+            setToken(null);
+            localStorage.removeItem('jurassic_token');
+            navigate('/login');
+        } finally {
+            setCargando(false);
+        }
     }, [token, navigate]);
+
+    useEffect(() => {
+        obtenerDatosIniciales();
+    }, [token, obtenerDatosIniciales]);
 
     const manejarLoginExitoso = (nuevoToken) => {
         setToken(nuevoToken);
@@ -120,8 +121,11 @@ function Aplicacion() {
     };
 
     const handleDinoSelect = (dinoId) => {
-        if (dinoId && dinos[dinoId]) {
-            setDinoSeleccionado(dinos[dinoId]);
+        if (dinoId && dinos.length > 0) {
+            const dino = dinos.find(d => d.dino_id_str === dinoId);
+            if (dino) {
+                setDinoSeleccionado(dino);
+            }
         }
     };
 
@@ -235,7 +239,7 @@ function Aplicacion() {
 
                 <Route path="/admin" element={
                     token && usuarioActual?.role === 'admin' ? (
-                        <AdminDashboard token={token} onSalirClick={iniciarCierreSesion}/>
+                        <AdminDashboard onSalirClick={iniciarCierreSesion}/>
                     ) : (
                         <Navigate to={token ? homePath : "/login"} replace/>
                     )
@@ -250,7 +254,8 @@ function Aplicacion() {
                                 onHelipuertoClick={handleHelipuertoClick}
                                 onCocheClick={handleCocheClick}
                                 onGuardasClick={handleGuardasClick}
-                                token={token}
+                                assetConfig={assetConfig}
+                                dinos={dinos}
                             />
                         ) : (
                             <Navigate to="/admin" replace/>
@@ -292,7 +297,7 @@ function Aplicacion() {
                 isOpen={jeepModalAbierto}
                 onClose={handleCloseJeepModal}
                 phase={jeepModalPhase}
-                locations={locations}
+                locations={LOCATIONS}
                 onSelectLocation={handleJeepRedirect}
             />
 
@@ -300,7 +305,6 @@ function Aplicacion() {
                 isOpen={guardasModalAbierto}
                 onClose={handleCloseGuardasModal}
             />
-
         </div>
     );
 }

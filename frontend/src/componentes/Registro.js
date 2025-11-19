@@ -199,178 +199,180 @@ function Registro() {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-header">
-                <div className="auth-logo">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7C21 5.9 20.1 5 19 5C17.9 5 17 5.9 17 7V9C15.9 9 15 9.9 15 11V16C15 17.1 15.9 18 17 18H19C20.1 18 21 17.1 21 16V11C21 9.9 20.1 9 19 9ZM19 7V9H17V7H19ZM7 9V7C7 5.9 6.1 5 5 5C3.9 5 3 5.9 3 7V9C1.9 9 1 9.9 1 11V16C1 17.1 1.9 18 3 18H5C6.1 18 7 17.1 7 16V11C7 9.9 6.1 9 5 9ZM5 7V9H3V7H5ZM12 8C14.2 8 16 9.8 16 12V18C16 19.1 15.1 20 14 20H10C8.9 20 8 19.1 8 18V12C8 9.8 9.8 8 12 8Z"/>
-                    </svg>
-                </div>
-                <h2>Crear Cuenta</h2>
-                <p>Únete a la aventura jurásica</p>
-            </div>
-
-            <form onSubmit={handleSubmit} noValidate className="auth-form">
-                <div className="form-group">
-                    <input
-                        type="text"
-                        name="nombre"
-                        placeholder="Nombre"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        required
-                        disabled={cargando}
-                        className={fieldErrors.nombre ? 'error' : ''}
-                    />
-                    {fieldErrors.nombre && <span className="field-error">{fieldErrors.nombre}</span>}
+        <div className="registro-page">
+            <div className="auth-container">
+                <div className="auth-header">
+                    <div className="auth-logo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7C21 5.9 20.1 5 19 5C17.9 5 17 5.9 17 7V9C15.9 9 15 9.9 15 11V16C15 17.1 15.9 18 17 18H19C20.1 18 21 17.1 21 16V11C21 9.9 20.1 9 19 9ZM19 7V9H17V7H19ZM7 9V7C7 5.9 6.1 5 5 5C3.9 5 3 5.9 3 7V9C1.9 9 1 9.9 1 11V16C1 17.1 1.9 18 3 18H5C6.1 18 7 17.1 7 16V11C7 9.9 6.1 9 5 9ZM5 7V9H3V7H5ZM12 8C14.2 8 16 9.8 16 12V18C16 19.1 15.1 20 14 20H10C8.9 20 8 19.1 8 18V12C8 9.8 9.8 8 12 8Z"/>
+                        </svg>
+                    </div>
+                    <h2>Crear Cuenta</h2>
+                    <p>Únete a la aventura jurásica</p>
                 </div>
 
-                <div className="form-group">
-                    <input
-                        type="text"
-                        name="apellidos"
-                        placeholder="Apellidos"
-                        value={formData.apellidos}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        required
-                        disabled={cargando}
-                        className={fieldErrors.apellidos ? 'error' : ''}
-                    />
-                    {fieldErrors.apellidos && <span className="field-error">{fieldErrors.apellidos}</span>}
-                </div>
-
-                <div className="form-group">
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Correo Electrónico"
-                        value={formData.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        required
-                        disabled={cargando}
-                        className={fieldErrors.email ? 'error' : ''}
-                    />
-                    {fieldErrors.email && <span className="field-error">{fieldErrors.email}</span>}
-                </div>
-
-                <div className="form-group">
-                    <div className="password-wrapper">
+                <form onSubmit={handleSubmit} noValidate className="auth-form">
+                    <div className="form-group">
                         <input
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            placeholder="Contraseña"
-                            value={formData.password}
+                            type="text"
+                            name="nombre"
+                            placeholder="Nombre"
+                            value={formData.nombre}
                             onChange={handleChange}
                             onBlur={handleBlur}
                             required
                             disabled={cargando}
-                            className={fieldErrors.password ? 'error' : ''}
+                            className={fieldErrors.nombre ? 'error' : ''}
                         />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="password-toggle"
-                            disabled={cargando}
-                            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                        >
-                            {showPassword ? EyeOffIcon : EyeIcon}
-                        </button>
+                        {fieldErrors.nombre && <span className="field-error">{fieldErrors.nombre}</span>}
                     </div>
 
-                    {formData.password && (
-                        <div className="password-requirements">
-                            <div className={`requirement ${passwordStrength.length ? 'valid' : 'invalid'}`}>
-                                {passwordStrength.length ? CheckIcon : XIcon}
-                                Mínimo 8 caracteres
+                    <div className="form-group">
+                        <input
+                            type="text"
+                            name="apellidos"
+                            placeholder="Apellidos"
+                            value={formData.apellidos}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            required
+                            disabled={cargando}
+                            className={fieldErrors.apellidos ? 'error' : ''}
+                        />
+                        {fieldErrors.apellidos && <span className="field-error">{fieldErrors.apellidos}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Correo Electrónico"
+                            value={formData.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            required
+                            disabled={cargando}
+                            className={fieldErrors.email ? 'error' : ''}
+                        />
+                        {fieldErrors.email && <span className="field-error">{fieldErrors.email}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <div className="password-wrapper">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                placeholder="Contraseña"
+                                value={formData.password}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                required
+                                disabled={cargando}
+                                className={fieldErrors.password ? 'error' : ''}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="password-toggle"
+                                disabled={cargando}
+                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                            >
+                                {showPassword ? EyeOffIcon : EyeIcon}
+                            </button>
+                        </div>
+
+                        {formData.password && (
+                            <div className="password-requirements">
+                                <div className={`requirement ${passwordStrength.length ? 'valid' : 'invalid'}`}>
+                                    {passwordStrength.length ? CheckIcon : XIcon}
+                                    Mínimo 8 caracteres
+                                </div>
+                                <div className={`requirement ${passwordStrength.uppercase ? 'valid' : 'invalid'}`}>
+                                    {passwordStrength.uppercase ? CheckIcon : XIcon}
+                                    1 letra mayúscula
+                                </div>
+                                <div className={`requirement ${passwordStrength.lowercase ? 'valid' : 'invalid'}`}>
+                                    {passwordStrength.lowercase ? CheckIcon : XIcon}
+                                    1 letra minúscula
+                                </div>
+                                <div className={`requirement ${passwordStrength.number ? 'valid' : 'invalid'}`}>
+                                    {passwordStrength.number ? CheckIcon : XIcon}
+                                    1 número
+                                </div>
+                                <div className={`requirement ${passwordStrength.special ? 'valid' : 'invalid'}`}>
+                                    {passwordStrength.special ? CheckIcon : XIcon}
+                                    1 símbolo (!@#$%^&*())
+                                </div>
                             </div>
-                            <div className={`requirement ${passwordStrength.uppercase ? 'valid' : 'invalid'}`}>
-                                {passwordStrength.uppercase ? CheckIcon : XIcon}
-                                1 letra mayúscula
-                            </div>
-                            <div className={`requirement ${passwordStrength.lowercase ? 'valid' : 'invalid'}`}>
-                                {passwordStrength.lowercase ? CheckIcon : XIcon}
-                                1 letra minúscula
-                            </div>
-                            <div className={`requirement ${passwordStrength.number ? 'valid' : 'invalid'}`}>
-                                {passwordStrength.number ? CheckIcon : XIcon}
-                                1 número
-                            </div>
-                            <div className={`requirement ${passwordStrength.special ? 'valid' : 'invalid'}`}>
-                                {passwordStrength.special ? CheckIcon : XIcon}
-                                1 símbolo (!@#$%^&*())
-                            </div>
+                        )}
+                        {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
+                    </div>
+
+                    <div className="checkbox-group">
+                        <div className="checkbox-container required">
+                            <input
+                                type="checkbox"
+                                id="privacidad"
+                                name="privacidad"
+                                checked={formData.privacidad}
+                                onChange={handleChange}
+                                disabled={cargando}
+                            />
+                            <label htmlFor="privacidad">
+                                Acepto la <strong>Política de Privacidad</strong>
+                            </label>
+                        </div>
+
+                        <div className="checkbox-container">
+                            <input
+                                type="checkbox"
+                                id="publicidad"
+                                name="publicidad"
+                                checked={formData.publicidad}
+                                onChange={handleChange}
+                                disabled={cargando}
+                            />
+                            <label htmlFor="publicidad">
+                                Acepto recibir comunicaciones comerciales
+                            </label>
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="error-message">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            {error}
                         </div>
                     )}
-                    {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
+
+                    <button
+                        type="submit"
+                        disabled={isSubmitDisabled()}
+                        className={`submit-button ${isSubmitDisabled() ? 'disabled' : ''}`}
+                    >
+                        {cargando ? (
+                            <>
+                                {LoadingSpinner}
+                                Creando cuenta...
+                            </>
+                        ) : (
+                            'Crear Cuenta'
+                        )}
+                    </button>
+                </form>
+
+                <div className="auth-switch">
+                    <p>
+                        ¿Ya tienes cuenta?{' '}
+                        <Link to="/login" className="auth-link">
+                            Inicia sesión aquí
+                        </Link>
+                    </p>
                 </div>
-
-                <div className="checkbox-group">
-                    <div className="checkbox-container required">
-                        <input
-                            type="checkbox"
-                            id="privacidad"
-                            name="privacidad"
-                            checked={formData.privacidad}
-                            onChange={handleChange}
-                            disabled={cargando}
-                        />
-                        <label htmlFor="privacidad">
-                            Acepto la <strong>Política de Privacidad</strong>
-                        </label>
-                    </div>
-
-                    <div className="checkbox-container">
-                        <input
-                            type="checkbox"
-                            id="publicidad"
-                            name="publicidad"
-                            checked={formData.publicidad}
-                            onChange={handleChange}
-                            disabled={cargando}
-                        />
-                        <label htmlFor="publicidad">
-                            Acepto recibir comunicaciones comerciales
-                        </label>
-                    </div>
-                </div>
-
-                {error && (
-                    <div className="error-message">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        {error}
-                    </div>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={isSubmitDisabled()}
-                    className={`submit-button ${isSubmitDisabled() ? 'disabled' : ''}`}
-                >
-                    {cargando ? (
-                        <>
-                            {LoadingSpinner}
-                            Creando cuenta...
-                        </>
-                    ) : (
-                        'Crear Cuenta'
-                    )}
-                </button>
-            </form>
-
-            <div className="auth-switch">
-                <p>
-                    ¿Ya tienes cuenta?{' '}
-                    <Link to="/login" className="auth-link">
-                        Inicia sesión aquí
-                    </Link>
-                </p>
             </div>
         </div>
     );

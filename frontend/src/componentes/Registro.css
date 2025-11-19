@@ -1,5 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
 
+.registro-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
 .auth-container {
     background: linear-gradient(135deg, #1a1a1a 0%, #2b2b2b 100%);
     padding: 30px 25px;
@@ -10,6 +21,27 @@
     max-width: 450px;
     font-family: 'Special Elite', cursive;
     margin: 20px auto;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.auth-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.auth-container::-webkit-scrollbar-track {
+    background: #2b2b2b;
+    border-radius: 3px;
+}
+
+.auth-container::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 3px;
+}
+
+.auth-container::-webkit-scrollbar-thumb:hover {
+    background: #f7b500;
 }
 
 .auth-header {
@@ -142,6 +174,9 @@
 .password-requirements {
     margin-top: 10px;
     font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .requirement {
@@ -149,12 +184,14 @@
     align-items: center;
     margin-bottom: 4px;
     transition: color 0.3s ease;
+    font-size: 0.7rem;
 }
 
 .requirement svg {
     margin-right: 6px;
     width: 14px;
     height: 14px;
+    flex-shrink: 0;
 }
 
 .requirement.valid {
@@ -165,6 +202,7 @@
     color: #ef4444;
 }
 
+/* Errores de campo */
 .field-error {
     color: #ef4444;
     font-size: 0.8rem;
@@ -174,6 +212,7 @@
     gap: 5px;
 }
 
+/* Checkboxes */
 .checkbox-group {
     display: flex;
     flex-direction: column;
@@ -201,6 +240,7 @@
     height: 18px;
     accent-color: #d4af37;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .checkbox-container input[type="checkbox"]:disabled {
@@ -221,6 +261,7 @@
     color: #d4af37;
 }
 
+/* Botón de envío */
 .submit-button {
     padding: 14px;
     font-size: clamp(1rem, 3vw, 1.1rem);
@@ -241,6 +282,7 @@
     justify-content: center;
     gap: 8px;
     min-height: 50px;
+    box-sizing: border-box;
 }
 
 .submit-button:hover:not(.disabled) {
@@ -297,6 +339,7 @@
 .auth-switch p {
     margin: 0;
     color: #ccc;
+    text-align: center;
 }
 
 .auth-link {
@@ -317,11 +360,22 @@
     text-decoration: underline;
 }
 
+/* Media Queries para responsividad */
+
+/* Tablets y móviles */
 @media (max-width: 480px) {
+    .registro-page {
+        padding: 15px;
+        align-items: flex-start;
+        min-height: 100vh;
+        height: auto;
+    }
+
     .auth-container {
         padding: 25px 20px;
-        margin: 15px auto;
+        margin: 10px auto;
         width: 95%;
+        max-height: 85vh;
     }
 
     .auth-form {
@@ -351,11 +405,25 @@
     .checkbox-container label {
         font-size: 0.85rem;
     }
+
+    .password-requirements {
+        font-size: 0.7rem;
+    }
+
+    .requirement {
+        font-size: 0.65rem;
+    }
 }
 
-@media (max-width: 320px) {
+/* Móviles pequeños */
+@media (max-width: 375px) {
+    .registro-page {
+        padding: 10px;
+    }
+
     .auth-container {
         padding: 20px 15px;
+        margin: 5px auto;
     }
 
     .auth-container h2 {
@@ -365,10 +433,100 @@
 
     .auth-container input {
         padding: 10px 12px;
+        font-size: 0.9rem;
     }
 
     .submit-button {
         padding: 10px;
         min-height: 44px;
+        font-size: 0.95rem;
+    }
+
+    .checkbox-container label {
+        font-size: 0.8rem;
+    }
+
+    .auth-switch {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-height: 700px) {
+    .registro-page {
+        align-items: flex-start;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .auth-container {
+        max-height: 95vh;
+        margin: 10px auto;
+    }
+
+    .auth-header {
+        margin-bottom: 20px;
+    }
+
+    .auth-form {
+        gap: 15px;
+    }
+
+    .checkbox-group {
+        gap: 12px;
+        margin: 8px 0;
+    }
+}
+
+@media (max-height: 600px) {
+    .auth-container {
+        padding: 20px;
+    }
+
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 10px;
+    }
+
+    .auth-logo svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .auth-header {
+        margin-bottom: 15px;
+    }
+
+    .password-requirements {
+        margin-top: 8px;
+    }
+
+    .requirement {
+        margin-bottom: 2px;
+    }
+}
+
+@media (max-width: 320px) {
+    .auth-container {
+        padding: 15px 12px;
+    }
+
+    .auth-container h2 {
+        font-size: 1.2rem;
+    }
+
+    .auth-container p {
+        font-size: 0.85rem;
+    }
+
+    .auth-container input {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+
+    .submit-button {
+        padding: 8px;
+        min-height: 42px;
+        font-size: 0.9rem;
     }
 }

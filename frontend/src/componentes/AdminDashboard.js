@@ -51,7 +51,6 @@ const AdminDashboard = ({onSalirClick}) => {
     const [jeepColor, setJeepColor] = useState('Green');
     const [carnivoreDino, setCarnivoreDino] = useState('RedDino');
     const [herbivoreDino, setHerbivoreDino] = useState('triceratops');
-
     const [aviaryDino] = useState('volador');
     const [aquaDino] = useState('marino');
 
@@ -59,12 +58,13 @@ const AdminDashboard = ({onSalirClick}) => {
     const [herbivoreModalOpen, setHerbivoreModalOpen] = useState(false);
 
     const [loading, setLoading] = useState(true);
-
+    const [saving, setSaving] = useState(false);
+    const [sendingCampaign, setSendingCampaign] = useState(false);
 
     const [users, setUsers] = useState([]);
     const [logs, setLogs] = useState([]);
     const [error, setError] = useState(null);
-
+    const [success, setSuccess] = useState('');
 
     const token = localStorage.getItem('jurassic_token');
 
@@ -75,6 +75,7 @@ const AdminDashboard = ({onSalirClick}) => {
 
     const fetchData = useCallback(async () => {
         try {
+            setLoading(true);
             const [usersRes, logsRes, assetsRes] = await Promise.all([
                 axios.get(`${API_URL}/admin/users/`, authHeaders),
                 axios.get(`${API_URL}/admin/logs/marketing`, authHeaders),
@@ -82,16 +83,17 @@ const AdminDashboard = ({onSalirClick}) => {
             ]);
 
             const cfg = assetsRes.data;
-            setJeepColor(cfg.jeepColor);
-            setCarnivoreDino(cfg.carnivoreDino);
-            setHerbivoreDino(cfg.herbivoreDino);
+            setJeepColor(cfg.jeepColor || 'Green');
+            setCarnivoreDino(cfg.carnivoreDino || 'RedDino');
+            setHerbivoreDino(cfg.herbivoreDino || 'triceratops');
 
             setUsers(usersRes.data);
             setLogs(logsRes.data);
+            setError(null);
 
         } catch (err) {
-            console.error(err);
-            setError(err.message);
+            console.error('Error fetching data:', err);
+            setError(err.response?.data?.detail || 'Error al cargar los datos');
         } finally {
             setLoading(false);
         }
@@ -102,6 +104,10 @@ const AdminDashboard = ({onSalirClick}) => {
     }, [token, fetchData]);
 
     const handleAssetSave = async () => {
+        setSaving(true);
+        setError('');
+        setSuccess('');
+
         const configData = {
             jeepColor,
             carnivoreDino,
@@ -112,10 +118,14 @@ const AdminDashboard = ({onSalirClick}) => {
 
         try {
             await axios.put(`${API_URL}/assets/config`, configData, authHeaders);
-            alert("Configuración guardada con éxito.");
+            await fetchData();
+            setSuccess('✅ Configuración guardada con éxito');
+            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            console.error(err);
-            alert("Error al guardar configuración.");
+            console.error('Error saving config:', err);
+            setError('❌ Error al guardar la configuración');
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -123,6 +133,10 @@ const AdminDashboard = ({onSalirClick}) => {
         if (!window.confirm("¿Estás seguro de que quieres enviar la campaña de email masivo a todos los usuarios?")) {
             return;
         }
+
+        setSendingCampaign(true);
+        setError('');
+        setSuccess('');
 
         try {
             const response = await axios.post(
@@ -132,166 +146,278 @@ const AdminDashboard = ({onSalirClick}) => {
             );
 
             const count = response.data.destinatarios_count || 'N/A';
-            alert(`¡Campaña enviada con éxito a ${count} usuarios!`);
+            setSuccess(`📧 ¡Campaña enviada con éxito a ${count} usuarios!`);
+            setTimeout(() => setSuccess(''), 5000);
             fetchData();
 
         } catch (err) {
             console.error("Error al enviar campaña:", err);
-            alert("Error al enviar la campaña. Revisa la consola.");
+            setError('❌ Error al enviar la campaña');
+        } finally {
+            setSendingCampaign(false);
         }
     };
 
+    const stats = useMemo(() => ({
+        totalUsers: users.length,
+        activeUsers: users.filter(u => u.is_active).length,
+        totalCampaigns: logs.length,
+        totalEmails: logs.reduce((sum, log) => sum + (log.destinatarios_count || 0), 0)
+    }), [users, logs]);
 
-    if (loading) return <div className="admin-loading">Cargando...</div>;
+    if (loading) {
+        return (
+            <div className="admin-loading">
+                <div className="loading-spinner"></div>
+                <p>Cargando panel de administración...</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="admin-dashboard">
-
-            <div className="admin-header">
-                <h2>Panel de Administración</h2>
-                <button onClick={onSalirClick}>Salir</button>
-            </div>
-
-            <div className="admin-grid">
-
-                {/* CARNÍVOROS */}
-                <div className="asset-selector">
-                    <h3>Carnívoro</h3>
-                    <img
-                        src={getPreviewPath(carnivoreDino, carnivoreOptions)}
-                        className="asset-preview"
-                        alt={`Carnívoro ${carnivoreDino}`}
-                    />
-                    <button onClick={() => setCarnivoreModalOpen(true)}>Cambiar</button>
-                </div>
-
-                {/* HERBÍVOROS */}
-                <div className="asset-selector">
-                    <h3>Herbívoro</h3>
-                    <img
-                        src={getPreviewPath(herbivoreDino, herbivoreOptions)}
-                        className="asset-preview"
-                        alt={`Herbívoro ${herbivoreDino}`}
-                    />
-                    <button onClick={() => setHerbivoreModalOpen(true)}>Cambiar</button>
-                </div>
-
-                {/* JEEP */}
-                <div className="asset-selector">
-                    <h3>Jeep</h3>
-                    <img
-                        src={getPreviewPath(jeepColor, jeepOptions)}
-                        className="asset-preview"
-                        alt={`Jeep ${jeepColor}`}
-                    />
-                    <select value={jeepColor} onChange={e => setJeepColor(e.target.value)}>
-                        {jeepOptions.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* AVIARIO */}
-                <div className="asset-selector">
-                    <h3>Aviario</h3>
-                    <img
-                        src={previewPaths.volador}
-                        className="asset-preview"
-                        alt="Dinosaurio volador"
-                    />
-                </div>
-
-                {/* ACUARIO */}
-                <div className="asset-selector">
-                    <h3>Acuario</h3>
-                    <img
-                        src={previewPaths.marino}
-                        className="asset-preview"
-                        alt="Dinosaurio marino"
-                    />
-                </div>
-
-                <button className="save-assets-btn" onClick={handleAssetSave}>
-                    Guardar Cambios
-                </button>
-            </div>
-            <div className="admin-data-section">
-                {error && <div className="admin-error">Error: {error}</div>}
-
-                <div className="admin-data-list">
-                    <h2>Usuarios Registrados</h2>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Username (Email)</th>
-                            <th>Nombre</th>
-                            <th>Rol</th>
-                            <th>Activo</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {users.map(user => (
-                            <tr key={user.id}>
-                                <td>{user.id}</td>
-                                <td>{user.username}</td>
-                                <td>{user.nombre} {user.apellidos}</td>
-                                <td>{user.role}</td>
-                                <td>{user.is_active ? 'Sí' : 'No'}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style={{margin: '1rem 0', textAlign: 'center'}}>
-                    <button
-                        className="email-campaign-btn"
-                        onClick={handleSendCampaign}
-                    >
-                        Enviar Campaña de Publicidad Masiva
+        <div className="admin-dashboard-container">
+            <div className="admin-dashboard">
+                {/* Header */}
+                <div className="admin-header">
+                    <div className="header-content">
+                        <h1>🦖 Panel de Administración</h1>
+                        <p>Gestiona los activos y usuarios del parque</p>
+                    </div>
+                    <button className="exit-btn" onClick={onSalirClick}>
+                        🚪 Salir
                     </button>
                 </div>
 
-                <div className="admin-data-list">
-                    <h2>Logs de Marketing</h2>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Admin</th>
-                            <th>Emails Enviados</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {logs.map(log => (
-                            <tr key={log.id}>
-                                <td>{new Date(log.timestamp).toLocaleString()}</td>
-                                <td>{log.admin_username}</td>
-                                <td>{log.destinatarios_count}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                {/* Stats Grid */}
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-icon">👥</div>
+                        <div className="stat-info">
+                            <h3>Total Usuarios</h3>
+                            <span className="stat-number">{stats.totalUsers}</span>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon">✅</div>
+                        <div className="stat-info">
+                            <h3>Usuarios Activos</h3>
+                            <span className="stat-number">{stats.activeUsers}</span>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon">📊</div>
+                        <div className="stat-info">
+                            <h3>Campañas</h3>
+                            <span className="stat-number">{stats.totalCampaigns}</span>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon">📧</div>
+                        <div className="stat-info">
+                            <h3>Emails Enviados</h3>
+                            <span className="stat-number">{stats.totalEmails}</span>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Messages */}
+                {error && (
+                    <div className="message error-message">
+                        {error}
+                    </div>
+                )}
+                {success && (
+                    <div className="message success-message">
+                        {success}
+                    </div>
+                )}
+
+                {/* Asset Management */}
+                <section className="assets-section">
+                    <h2>🎨 Gestión de Activos</h2>
+                    <div className="admin-grid">
+                        {/* CARNÍVOROS */}
+                        <div className="asset-selector">
+                            <h3>🦖 Carnívoro</h3>
+                            <img
+                                src={getPreviewPath(carnivoreDino, carnivoreOptions)}
+                                className="asset-preview"
+                                alt={`Carnívoro ${carnivoreDino}`}
+                            />
+                            <button
+                                onClick={() => setCarnivoreModalOpen(true)}
+                                className="change-btn"
+                            >
+                                🔄 Cambiar
+                            </button>
+                        </div>
+
+                        {/* HERBÍVOROS */}
+                        <div className="asset-selector">
+                            <h3>🌿 Herbívoro</h3>
+                            <img
+                                src={getPreviewPath(herbivoreDino, herbivoreOptions)}
+                                className="asset-preview"
+                                alt={`Herbívoro ${herbivoreDino}`}
+                            />
+                            <button
+                                onClick={() => setHerbivoreModalOpen(true)}
+                                className="change-btn"
+                            >
+                                🔄 Cambiar
+                            </button>
+                        </div>
+
+                        {/* JEEP */}
+                        <div className="asset-selector">
+                            <h3>🚙 Jeep</h3>
+                            <img
+                                src={getPreviewPath(jeepColor, jeepOptions)}
+                                className="asset-preview"
+                                alt={`Jeep ${jeepColor}`}
+                            />
+                            <select
+                                value={jeepColor}
+                                onChange={e => setJeepColor(e.target.value)}
+                                className="asset-select"
+                            >
+                                {jeepOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* AVIARIO */}
+                        <div className="asset-selector">
+                            <h3>🦅 Aviario</h3>
+                            <img
+                                src={previewPaths.volador}
+                                className="asset-preview"
+                                alt="Dinosaurio volador"
+                            />
+                            <div className="asset-info">Configuración fija</div>
+                        </div>
+
+                        {/* ACUARIO */}
+                        <div className="asset-selector">
+                            <h3>🐟 Acuario</h3>
+                            <img
+                                src={previewPaths.marino}
+                                className="asset-preview"
+                                alt="Dinosaurio marino"
+                            />
+                            <div className="asset-info">Configuración fija</div>
+                        </div>
+                    </div>
+
+                    <button
+                        className="save-assets-btn"
+                        onClick={handleAssetSave}
+                        disabled={saving}
+                    >
+                        {saving ? '💾 Guardando...' : '💾 Guardar Cambios'}
+                    </button>
+                </section>
+
+                {/* Users Table */}
+                <section className="data-section">
+                    <h2>👥 Usuarios Registrados</h2>
+                    <div className="table-container">
+                        <table className="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.map(user => (
+                                    <tr key={user.id}>
+                                        <td>{user.id}</td>
+                                        <td className="email-cell">{user.username}</td>
+                                        <td>{user.nombre} {user.apellidos}</td>
+                                        <td>
+                                            <span className={`role-badge ${user.role}`}>
+                                                {user.role}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${user.is_active ? 'active' : 'inactive'}`}>
+                                                {user.is_active ? '✅ Activo' : '❌ Inactivo'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                {/* Marketing Section */}
+                <section className="marketing-section">
+                    <div className="marketing-header">
+                        <h2>📢 Marketing</h2>
+                        <button
+                            className="email-campaign-btn"
+                            onClick={handleSendCampaign}
+                            disabled={sendingCampaign}
+                        >
+                            {sendingCampaign ? '📤 Enviando...' : '📧 Enviar Campaña Masiva'}
+                        </button>
+                    </div>
+
+                    <div className="table-container">
+                        <table className="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Administrador</th>
+                                    <th>Emails Enviados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {logs.map(log => (
+                                    <tr key={log.id}>
+                                        <td>{new Date(log.timestamp).toLocaleString()}</td>
+                                        <td>{log.admin_username}</td>
+                                        <td>
+                                            <span className="email-count">
+                                                {log.destinatarios_count}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {logs.length === 0 && (
+                            <div className="empty-state">
+                                📭 No hay registros de campañas
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                <AdminDinoSelectModal
+                    isOpen={carnivoreModalOpen}
+                    onClose={() => setCarnivoreModalOpen(false)}
+                    onSelectDino={setCarnivoreDino}
+                    dinoOptions={carnivoreOptions}
+                    title="Seleccionar Carnívoro"
+                />
+
+                <AdminDinoSelectModal
+                    isOpen={herbivoreModalOpen}
+                    onClose={() => setHerbivoreModalOpen(false)}
+                    onSelectDino={setHerbivoreDino}
+                    dinoOptions={herbivoreOptions}
+                    title="Seleccionar Herbívoro"
+                />
             </div>
-
-            {/* Modales */}
-            <AdminDinoSelectModal
-                isOpen={carnivoreModalOpen}
-                onClose={() => setCarnivoreModalOpen(false)}
-                onSelectDino={setCarnivoreDino}
-                dinoOptions={carnivoreOptions}
-                title="Seleccionar Carnívoro"
-            />
-
-            <AdminDinoSelectModal
-                isOpen={herbivoreModalOpen}
-                onClose={() => setHerbivoreModalOpen(false)}
-                onSelectDino={setHerbivoreDino}
-                dinoOptions={herbivoreOptions}
-                title="Seleccionar Herbívoro"
-            />
         </div>
     );
 };

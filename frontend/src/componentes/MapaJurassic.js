@@ -2,26 +2,55 @@ import React, {useRef, useState, useEffect} from 'react';
 import {Stage, Layer, Image, Circle, Label, Tag, Text} from 'react-konva';
 import useImage from 'use-image';
 
+import { LOCATIONS } from './config/locations';
+import { JEEP_OPTIONS } from './config/JeepOptions';
+
 const ORIGINAL_WIDTH = 1152;
 const ORIGINAL_HEIGHT = 768;
 
-const locations = [
-    {"name": "Recinto Carnívoros", "x": 236, "y": 290, "r": 8, "dinoId": "dino_001"},
-    {"name": "Recinto Herbívoros", "x": 334, "y": 374, "r": 8, "dinoId": "dino_004"},
-    {"name": "Recinto Aviario", "x": 500, "y": 438, "r": 8, "dinoId": "dino_003"},
-    {"name": "Puerta", "x": 857, "y": 620, "r": 8},
-    {"name": "Coche", "x": 608, "y": 658, "r": 8},
-    {"name": "Recinto Acuario", "x": 862, "y": 159, "r": 8, "dinoId": "dino_002"},
-    {"name": "Guardas", "x": 484, "y": 336, "r": 8},
-    {"name": "Helipuerto", "x": 575, "y": 175, "r": 8},
-];
+const getPreviewPath = (value, list) => {
+    const item = list.find(o => o.value === value);
+    return item ? item.previewPath : '';
+};
 
 const MapaImage = ({width, height}) => {
     const [image] = useImage('/mapa.png');
     return <Image image={image} width={width} height={height}/>;
 };
 
-const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, onHelipuertoClick, onCocheClick, onGuardasClick}) => {
+const JeepSprite = ({ color, x, y, scaleX, scaleY }) => {
+    const path = getPreviewPath(color, JEEP_OPTIONS);
+    const [image] = useImage(path);
+
+    const jeepBaseWidth = 60;
+    const jeepBaseHeight = 60;
+
+    const scaledX = x * scaleX - (jeepBaseWidth * scaleX / 2);
+    const scaledY = y * scaleY - (jeepBaseHeight * scaleY / 2);
+
+    return (
+        <Image
+            image={image}
+            x={scaledX}
+            y={scaledY}
+            width={jeepBaseWidth * scaleX}
+            height={jeepBaseHeight * scaleY}
+        />
+    );
+};
+
+const MapPoint = ({
+    point,
+    scaleX,
+    scaleY,
+    onHover,
+    onSalirClick,
+    onDinoSelect,
+    onHelipuertoClick,
+    onCocheClick,
+    onGuardasClick,
+    tooltipText
+}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const scaleAvg = (scaleX + scaleY) / 2;
@@ -33,7 +62,7 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
         onHover(true, {
             x: scaledX + scaledRadius + 5,
             y: scaledY,
-            text: point.name
+            text: tooltipText
         });
         setIsHovered(true);
         const stage = e.target.getStage();
@@ -47,7 +76,7 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
         if (stage) stage.content.style.cursor = 'default';
     };
 
-    const handleClick = (e) => {
+    const handleClick = () => {
         if (point.name === "Puerta" && onSalirClick) {
             onSalirClick();
         } else if (point.dinoId && onDinoSelect) {
@@ -66,7 +95,7 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
             x={scaledX}
             y={scaledY}
             radius={isHovered ? scaledRadius * 1.2 : scaledRadius}
-            fill="#ff4136"
+            fill={point.type === "jeep" ? 'rgba(0,0,0,0)' : "#ff4136"}  // Jeep = clic invisible
             stroke="#ffffff"
             strokeWidth={2}
             shadowBlur={isHovered ? 10 : 5}
@@ -74,15 +103,23 @@ const MapPoint = ({point, scaleX, scaleY, onHover, onSalirClick, onDinoSelect, o
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
+            visible={true}   // <-- SIEMPRE visible (pero jeep transparente)
         />
     );
 };
 
-const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick, onCocheClick, onGuardasClick }) => {
+const MapaJurassic = ({
+    onSalirClick,
+    onDinoSelect,
+    onHelipuertoClick,
+    onCocheClick,
+    onGuardasClick,
+    assetConfig,
+    dinos
+}) => {
     const wrapperRef = useRef(null);
     const [size, setSize] = useState({width: ORIGINAL_WIDTH, height: ORIGINAL_HEIGHT});
     const [tooltip, setTooltip] = useState(null);
-    const [scale, setScale] = useState(1);
 
     useEffect(() => {
         const updateSize = () => {
@@ -99,28 +136,30 @@ const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick, onCocheCl
                     width: containerWidth,
                     height: containerHeight
                 });
-                setScale(newScale);
             }
         };
 
         updateSize();
         window.addEventListener('resize', updateSize);
 
-        return () => {
-            window.removeEventListener('resize', updateSize);
-        };
+        return () => window.removeEventListener('resize', updateSize);
     }, []);
 
     const handlePointHover = (isVisible, data) => {
-        if (isVisible) {
-            setTooltip(data);
-        } else {
-            setTooltip(null);
-        }
+        if (isVisible) setTooltip(data);
+        else setTooltip(null);
     };
 
     const scaleX = size.width / ORIGINAL_WIDTH;
     const scaleY = size.height / ORIGINAL_HEIGHT;
+
+    const getDinoNameForLocation = (loc) => {
+        if (loc.dinoId && dinos && Array.isArray(dinos)) {
+            const currentDino = dinos.find(d => d.dino_id_str === loc.dinoId);
+            return currentDino ? `${loc.name}: ${currentDino.nombre}` : loc.name;
+        }
+        return loc.name;
+    };
 
     return (
         <div
@@ -148,23 +187,42 @@ const MapaJurassic = ({ onSalirClick, onDinoSelect, onHelipuertoClick, onCocheCl
                 }}
             >
                 <Layer>
+                    {/* MAPA */}
                     <MapaImage width={size.width} height={size.height}/>
 
-                    {locations.map((loc) => (
-                        <MapPoint
-                            key={loc.name}
-                            point={loc}
-                            scaleX={scaleX}
-                            scaleY={scaleY}
-                            onHover={handlePointHover}
-                            onSalirClick={onSalirClick}
-                            onDinoSelect={onDinoSelect}
-                            onHelipuertoClick={onHelipuertoClick}
-                            onCocheClick={onCocheClick}
-                            onGuardasClick={onGuardasClick}
-                        />
-                    ))}
+                    {/* PUNTOS */}
+                    {LOCATIONS.map((loc) => {
+                        return (
+                            <React.Fragment key={loc.name}>
+                                {/* Jeep visual */}
+                                {loc.type === "jeep" && assetConfig && (
+                                    <JeepSprite
+                                        color={assetConfig.jeepColor || 'Green'}
+                                        x={loc.x}
+                                        y={loc.y}
+                                        scaleX={scaleX}
+                                        scaleY={scaleY}
+                                    />
+                                )}
 
+                                {/* Punto clicable */}
+                                <MapPoint
+                                    point={loc}
+                                    scaleX={scaleX}
+                                    scaleY={scaleY}
+                                    onHover={handlePointHover}
+                                    onSalirClick={onSalirClick}
+                                    onDinoSelect={onDinoSelect}
+                                    onHelipuertoClick={onHelipuertoClick}
+                                    onCocheClick={onCocheClick}
+                                    onGuardasClick={onGuardasClick}
+                                    tooltipText={getDinoNameForLocation(loc)}
+                                />
+                            </React.Fragment>
+                        );
+                    })}
+
+                    {/* TOOLTIP */}
                     {tooltip && (
                         <Label x={tooltip.x} y={tooltip.y}>
                             <Tag

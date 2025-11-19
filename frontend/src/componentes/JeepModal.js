@@ -32,7 +32,7 @@ const FRAME_PATHS_VIAJE = [
   '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_011.png',
 ];
 
-const JeepModal = ({ isOpen, onClose, locations, onSelectLocation, phase }) => {
+const JeepModal = ({ isOpen, onClose, locations = [], onSelectLocation, phase }) => {
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
