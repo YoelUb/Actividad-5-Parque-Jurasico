@@ -103,9 +103,8 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
-  background-color: #000;
+  background-color: black;
   border-radius: 8px;
-  border: 1px solid #333;
 }
 
 .raptor-sprite {

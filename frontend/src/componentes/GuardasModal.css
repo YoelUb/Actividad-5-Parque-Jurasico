@@ -80,10 +80,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #ffffff;
+  background: black;
   border-radius: 8px;
   margin: 20px 0;
-  border: 2px solid #e0e0e0;
   overflow: hidden;
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

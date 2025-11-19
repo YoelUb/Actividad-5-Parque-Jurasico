@@ -18,27 +18,6 @@ const MapaImage = ({width, height}) => {
     return <Image image={image} width={width} height={height}/>;
 };
 
-const JeepSprite = ({ color, x, y, scaleX, scaleY }) => {
-    const path = getPreviewPath(color, JEEP_OPTIONS);
-    const [image] = useImage(path);
-
-    const jeepBaseWidth = 60;
-    const jeepBaseHeight = 60;
-
-    const scaledX = x * scaleX - (jeepBaseWidth * scaleX / 2);
-    const scaledY = y * scaleY - (jeepBaseHeight * scaleY / 2);
-
-    return (
-        <Image
-            image={image}
-            x={scaledX}
-            y={scaledY}
-            width={jeepBaseWidth * scaleX}
-            height={jeepBaseHeight * scaleY}
-        />
-    );
-};
-
 const MapPoint = ({
     point,
     scaleX,
@@ -95,7 +74,7 @@ const MapPoint = ({
             x={scaledX}
             y={scaledY}
             radius={isHovered ? scaledRadius * 1.2 : scaledRadius}
-            fill={point.type === "jeep" ? 'rgba(0,0,0,0)' : "#ff4136"}  // Jeep = clic invisible
+            fill="#ff4136"
             stroke="#ffffff"
             strokeWidth={2}
             shadowBlur={isHovered ? 10 : 5}
@@ -103,7 +82,6 @@ const MapPoint = ({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
-            visible={true}   // <-- SIEMPRE visible (pero jeep transparente)
         />
     );
 };
@@ -129,8 +107,6 @@ const MapaJurassic = ({
                     containerWidth * (ORIGINAL_HEIGHT / ORIGINAL_WIDTH),
                     window.innerHeight * 0.9
                 );
-
-                const newScale = containerWidth / ORIGINAL_WIDTH;
 
                 setSize({
                     width: containerWidth,
@@ -164,7 +140,6 @@ const MapaJurassic = ({
     return (
         <div
             ref={wrapperRef}
-            className="map-wrapper"
             style={{
                 width: '100%',
                 height: 'auto',
@@ -187,42 +162,25 @@ const MapaJurassic = ({
                 }}
             >
                 <Layer>
-                    {/* MAPA */}
                     <MapaImage width={size.width} height={size.height}/>
 
-                    {/* PUNTOS */}
-                    {LOCATIONS.map((loc) => {
-                        return (
-                            <React.Fragment key={loc.name}>
-                                {/* Jeep visual */}
-                                {loc.type === "jeep" && assetConfig && (
-                                    <JeepSprite
-                                        color={assetConfig.jeepColor || 'Green'}
-                                        x={loc.x}
-                                        y={loc.y}
-                                        scaleX={scaleX}
-                                        scaleY={scaleY}
-                                    />
-                                )}
+                    {LOCATIONS.map((loc) => (
+                        <React.Fragment key={loc.name}>
+                            <MapPoint
+                                point={loc}
+                                scaleX={scaleX}
+                                scaleY={scaleY}
+                                onHover={handlePointHover}
+                                onSalirClick={onSalirClick}
+                                onDinoSelect={onDinoSelect}
+                                onHelipuertoClick={onHelipuertoClick}
+                                onCocheClick={onCocheClick}
+                                onGuardasClick={onGuardasClick}
+                                tooltipText={getDinoNameForLocation(loc)}
+                            />
+                        </React.Fragment>
+                    ))}
 
-                                {/* Punto clicable */}
-                                <MapPoint
-                                    point={loc}
-                                    scaleX={scaleX}
-                                    scaleY={scaleY}
-                                    onHover={handlePointHover}
-                                    onSalirClick={onSalirClick}
-                                    onDinoSelect={onDinoSelect}
-                                    onHelipuertoClick={onHelipuertoClick}
-                                    onCocheClick={onCocheClick}
-                                    onGuardasClick={onGuardasClick}
-                                    tooltipText={getDinoNameForLocation(loc)}
-                                />
-                            </React.Fragment>
-                        );
-                    })}
-
-                    {/* TOOLTIP */}
                     {tooltip && (
                         <Label x={tooltip.x} y={tooltip.y}>
                             <Tag
