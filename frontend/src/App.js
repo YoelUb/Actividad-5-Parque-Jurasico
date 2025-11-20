@@ -299,6 +299,7 @@ function Aplicacion() {
                 phase={jeepModalPhase}
                 locations={LOCATIONS}
                 onSelectLocation={handleJeepRedirect}
+                jeepColor={assetConfig?.jeepColor || 'Green'}
             />
 
             <GuardasModal

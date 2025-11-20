@@ -25,8 +25,19 @@ const DinoModal = ({ dino, onClose }) => {
 
   const animData = dino.animations ? dino.animations[animacionActual] : null;
 
+  let finalBasePath = dino.sprite_base_path;
+  if (animData && animData.length > 2) {
+      finalBasePath = finalBasePath + animData[2];
+  }
+
+  const dietaNormalizada = dino.dieta ? dino.dieta.toLowerCase() : '';
+  const nombreNormalizado = dino.nombre ? dino.nombre.toLowerCase() : '';
+
+  const esDinosaurioTerrestre =
+    (dietaNormalizada === 'carnívoro' && !nombreNormalizado.includes('pteranodon')) ||
+    (dietaNormalizada === 'herbívoro' && nombreNormalizado.includes('brontosaurus'));
+
   const mostrarControlesAnimacion = () => {
-    const esDinosaurioTerrestre = dino.dieta === 'herbívoro' || dino.dieta === 'carnívoro';
     return esDinosaurioTerrestre && animData && dino.sprite_base_path;
   };
 
@@ -35,8 +46,6 @@ const DinoModal = ({ dino, onClose }) => {
 
     const animaciones = ['idle'];
 
-    // Solo añadir walk si es dinosaurio terrestre
-    const esDinosaurioTerrestre = dino.dieta === 'herbívoro' || dino.dieta === 'carnívoro';
     if (esDinosaurioTerrestre && dino.animations.walk) {
       animaciones.push('walk');
     }
@@ -60,7 +69,7 @@ const DinoModal = ({ dino, onClose }) => {
           <>
             <div className="anim-container">
               <SpriteAnimator
-                basePath={dino.sprite_base_path}
+                basePath={finalBasePath}
                 frameCount={animData[1] - animData[0] + 1}
                 startFrame={animData[0]}
                 fps={10}
@@ -93,7 +102,7 @@ const DinoModal = ({ dino, onClose }) => {
           <p>No hay animación disponible para este dinosaurio.</p>
         )}
 
-        {dino.dieta && !['herbívoro', 'carnívoro'].includes(dino.dieta) && (
+        {!esDinosaurioTerrestre && dino.dieta && (
           <div className="info-message">
             <p>💡 Este animal muestra su comportamiento natural en su hábitat.</p>
           </div>

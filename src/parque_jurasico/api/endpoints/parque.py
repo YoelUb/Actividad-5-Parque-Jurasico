@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 def get_config_path():
-    base_dir = Path(__file__).resolve().parent.parent.parent
+    base_dir = Path(__file__).resolve().parent.parent.parent.parent
     return base_dir / "assets_config.json"
 
 
@@ -54,7 +54,10 @@ ASSET_DATA_MAP = {
         "nombre": "Spinosaurus",
         "sprite_base_path": "/Dino_Especial",
         "descripcion": "Un temible depredador semi-acuático con animaciones 'idle' y 'walk'.",
-        "animations": {"idle": [1, 8, "/idle/Spino"], "walk": [9, 12, "/walk/Spino"]}
+        "animations": {
+            "idle": [1, 8, "/idle/Spino"],
+            "walk": [9, 12, "/idle/Spino"]
+        }
     },
     "triceratops": {
         "nombre": "Triceratops",
@@ -64,9 +67,12 @@ ASSET_DATA_MAP = {
     },
     "broncosaurio_azul": {
         "nombre": "Brontosaurus (Azul)",
-        "sprite_base_path": "/broncosaurio_azul",
+        "sprite_base_path": "/broncosaurio",
         "descripcion": "Un gentil gigante de cuello largo con una distintiva coloración azulada.",
-        "animations": {"idle": [1, 12, "/idle/broncosaurio"], "walk": [1, 13, "/walk/broncosaurio"]}
+        "animations": {
+            "idle": [1, 12, "/idle/broncosaurio"],
+            "walk": [13, 30, "/idle/broncosaurio"]
+        }
     },
     "volador": {
         "nombre": "Pteranodon",
@@ -93,7 +99,6 @@ async def _get_asset_config():
             "jeepColor": "Green",
             "carnivoreDino": "RedDino",
             "herbivoreDino": "triceratops",
-            "herbivoreDinoSecundario": "broncosaurio_azul",
             "aviaryDino": "volador",
             "aquaDino": "marino"
         }

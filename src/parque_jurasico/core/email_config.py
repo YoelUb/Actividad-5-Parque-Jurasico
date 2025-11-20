@@ -1,302 +1,331 @@
-import os
-import random
-import string
-from pydantic_settings import BaseSettings
-from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
-from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from typing import List
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from ...bd.BaseDatos import get_db_session
+from ...security import seguridad
+from ...modelos import dinosaurio as modelos
+from ...modelos.dinosaurio import Usuario, Dinosaurio as DinosaurioTabla, Recinto as RecintoTabla, HistorialEnviosPubli, \
+    UserReadSchema, HistorialEnviosPubliSchema
+from ...core import email_config
+import logging
+from datetime import datetime, timedelta, timezone
+import random
 
-load_dotenv()
+router = APIRouter()
+logger = logging.getLogger(__name__)
 
+CUERPO_EXPEDICION = """
+🦖🌴 *¡ALERTA DE EXPEDICIÓN!* 🌴🦕
 
-class EmailSettings(BaseSettings):
-    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "default_user")
-    MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD", "default_pass")
-    MAIL_FROM: str = os.getenv("MAIL_FROM", "default@example.com")
-    MAIL_PORT: int = int(os.getenv("MAIL_PORT", 587))
-    MAIL_SERVER: str = os.getenv("MAIL_SERVER", "smtp.example.com")
-    MAIL_FROM_NAME: str = os.getenv("MAIL_FROM_NAME", "Jurassic Park")
-    MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS", "True").lower() == "true"
-    MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS", "False").lower() == "true"
-    USE_CREDENTIALS: bool = os.getenv("USE_CREDENTIALS", "True").lower() == "true"
-    VALIDATE_CERTS: bool = os.getenv("VALIDATE_CERTS", "True").lower() == "true"
-    FRONTEND_DOMAIN: str = os.getenv("FRONTEND_DOMAIN", "http://localhost:3000")
+*Estimado/a Explorador/a,*
 
-    class Config:
-        extra = 'ignore'
+Nuestros equipos de investigación han hecho un descubrimiento extraordinario en la Tienda Oficial de Jurassic Park. 
+Se han desenterrado NUEVAS y ESPECTACULARES reliquias que ningún amante de los dinosaurios querrá perderse.
 
+*🎁 TESOROS DESCUBIERTOS:*
+• 🦖 Peluches de T-Rex Ultra Realistas
+• 🥚 Huevos de Dinosaurio con Sorpresa
+• 🧪 Kits de Paleontólogo Junior
+• 🏺 Réplicas de Fósiles Exclusivas
+• 👕 Ropa de Expedición Oficial
 
-settings = EmailSettings()
+*📍 UBICACIÓN:* Tienda Regalos Jurassic Park
+*⏰ TIEMPO LIMITADO:* Algunas especies pueden extinguirse pronto...
 
-conf = ConnectionConfig(
-    MAIL_USERNAME=settings.MAIL_USERNAME,
-    MAIL_PASSWORD=settings.MAIL_PASSWORD,
-    MAIL_FROM=settings.MAIL_FROM,
-    MAIL_PORT=settings.MAIL_PORT,
-    MAIL_SERVER=settings.MAIL_SERVER,
-    MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
-    MAIL_STARTTLS=settings.MAIL_STARTTLS,
-    MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-    USE_CREDENTIALS=settings.USE_CREDENTIALS,
-    VALIDATE_CERTS=settings.VALIDATE_CERTS,
-    TEMPLATE_FOLDER='./src/parque_jurasico/templates/email'
-)
+*¡No dejes que estas maravillas prehistóricas se extingan!*
+Visita nuestra tienda hoy y lleva a casa un pedazo de historia.
 
-fm = FastMail(conf)
+*🌋 "Revive la magia, vive la aventura"* 🌋
 
+*El Equipo de Jurassic Park*
+*Donde la prehistoria cobra vida*
+"""
 
-def generate_verification_code(length: int = 6) -> str:
-    return "".join(random.choices(string.digits, k=length))
+CUERPO_CIENTIFICO = """
+🔬 *COMUNICADO OFICIAL - DEPARTAMENTO DE PALEONTOLOGÍA* 🔬
 
+*PARA: Todos los miembros registrados de Jurassic Park*
+*DE: Dr. Alan Grant - Departamento de Exhibiciones*
 
-def create_jurassic_park_email_template(code: str, nombre_usuario: str) -> str:
-    return f"""
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Verificación de Cuenta - Jurassic Park</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                background-color: #f4f4f4;
-                margin: 0;
-                padding: 0;
-            }}
-            .container {{
-                width: 90%;
-                max-width: 600px;
-                margin: 20px auto;
-                background-color: #ffffff;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                overflow: hidden;
-            }}
-            .header {{
-                background-color: #c0392b;
-                color: #ffffff;
-                padding: 20px;
-                text-align: center;
-            }}
-            .header h1 {{
-                margin: 0;
-                font-size: 24px;
-            }}
-            .content {{
-                padding: 30px;
-            }}
-            .content p {{
-                font-size: 16px;
-                color: #333;
-            }}
-            .code-box {{
-                background-color: #eeeeee;
-                border: 1px dashed #ccc;
-                padding: 20px;
-                text-align: center;
-                margin: 20px 0;
-            }}
-            .code {{
-                font-size: 32px;
-                font-weight: bold;
-                color: #c0392b;
-                letter-spacing: 4px;
-            }}
-            .footer {{
-                background-color: #333;
-                color: #aaa;
-                padding: 20px;
-                text-align: center;
-                font-size: 12px;
-            }}
-            .footer p {{
-                margin: 5px 0;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>¡Bienvenido a Jurassic Park!</h1>
-            </div>
-            <div class="content">
-                <p>Hola, {nombre_usuario},</p>
-                <p>Estás a un paso de completar tu registro. Por favor, usa el siguiente código de verificación para activar tu cuenta. El código expirará en 20 minutos.</p>
+*ASUNTO: Nuevos Especímenes Disponibles*
 
-                <div class="code-box">
-                    <p style="margin-bottom: 10px;">Tu código de verificación es:</p>
-                    <div class="code">{code}</div>
-                </div>
+Estimados visitantes,
 
-                <p>Si no intentaste registrarte en nuestra web, por favor ignora este correo.</p>
-                <p>¡Esperamos verte pronto en la isla!</p>
-                <p><strong>— El Equipo de InGen</strong></p>
-            </div>
-            <div class="footer">
-                <p>&copy; 2024 InGen Corporation. Todos los derechos reservados.</p>
-                <p>Isla Nublar</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
+Es con gran entusiasmo que anunciamos la llegada de NUEVOS ESPECÍMENES a nuestra Tienda de Regalos. 
+Estos artículos han sido meticulosamente seleccionados por nuestro equipo científico.
 
+*📦 NUEVAS ADQUISICIONES:*
+┌─────────────────────────────────────┐
+│ 🦕 T-Rex Premium Collection         │
+│ 🦖 Triceratops Sound Edition        │
+│ 🥚 Dino Eggs Mystery Pack           │
+│ 🔍 Fossil Digging Kit Pro           │
+│ 🎒 Expedition Backpack Deluxe       │
+└─────────────────────────────────────┘
 
-def create_confirmation_email_template(nombre_usuario: str, email_usuario: str, login_url: str) -> str:
-    return f"""
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>¡Cuenta Verificada! - Jurassic Park</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif; line-height: 1.6;
-                background-color: #f4f4f4; margin: 0; padding: 0;
-            }}
-            .container {{
-                width: 90%; max-width: 600px; margin: 20px auto;
-                background-color: #ffffff; border: 1px solid #ddd;
-                border-radius: 8px; overflow: hidden;
-            }}
-            .header {{
-                background-color: #27ae60; color: #ffffff;
-                padding: 20px; text-align: center;
-            }}
-            .header h1 {{ margin: 0; font-size: 24px; }}
-            .content {{ padding: 30px; }}
-            .content p {{ font-size: 16px; color: #333; }}
-            .button {{
-                display: inline-block;
-                background-color: #27ae60;
-                color: #ffffff;
-                padding: 12px 25px;
-                margin: 20px 0;
-                text-decoration: none;
-                border-radius: 5px;
-                font-weight: bold;
-            }}
-            .footer {{
-                background-color: #333; color: #aaa;
-                padding: 20px; text-align: center; font-size: 12px;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>¡Bienvenido a Bordo!</h1>
-            </div>
-            <div class="content">
-                <p>Hola, {nombre_usuario},</p>
-                <p>Tu cuenta de Jurassic Park ha sido <strong>VERIFICADA :)</strong>. ¡Ya tienes acceso completo al parque!</p>
-                <p>Puedes iniciar sesión en cualquier momento usando tu correo:</p>
-                <p><strong>Usuario:</strong> {email_usuario}</p>
+*⚠️ ADVERTENCIA:* Estos artículos pueden causar:
+• Fascinación extrema
+• Coleccionismo compulsivo
+• Diversión familiar garantizada
 
-                <p style="text-align: center;">
-                    <a href="{login_url}" class="button">Entrar al Parque</a>
-                </p>
+*🏃‍♂️ ¡Corre antes que se extingan!*
+Nuestro stock es limitado como las especies que representamos.
 
-                <p>¡Esperamos verte pronto en la isla!</p>
-                <p><strong>— El Equipo de InGen</strong></p>
-            </div>
-            <div class="footer">
-                <p>&copy; 2024 InGen Corporation. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
+*Jurassic Park - Más de 65 millones de años de emoción*
+"""
+
+CUERPO_AVENTURA = """
+🌄 *¡AVENTURA EN EL HORIZONTE!* 🌄
+
+*Querido/a Aventurero/a,*
+
+Las puertas de Jurassic Park se abren para revelar tesoros nunca antes vistos. 
+Prepárate para embarcarte en una misión de compras prehistórica como ninguna otra.
+
+*🗺️ MAPA DEL TESORO:*
+╔══════════════════════════════════╗
+║            NUEVOS HALLAZGOS      ║
+╠══════════════════════════════════╣
+║ • 🦖 T-Rex Royale Edition        ║
+║ • 🦕 Brachiosaurus Gigante       ║
+║ • 🦖 Velociraptor Pack           ║
+║ • 🥚 Dino Egg Collection         ║
+║ • 🎨 Jurassic Art Set            ║
+╚══════════════════════════════════╝
+
+*🚨 ALERTA DE AVENTURA:*
+Nuestros exploradores reportan que estos artículos están causando revuelo entre 
+visitantes de todas las edades. ¡No te quedes fuera de esta expedición!
+
+*⚡ Actúa rápido - La aventura espera*
+Visita nuestra tienda y descubre por qué dicen:
+"¡Es más emocionante que encontrar un fósil real!"
+
+*🐾 Jurassic Park - Donde los sueños prehistóricos se hacen realidad* 🐾
+"""
+
+CUERPO_COMUNICACION = """
+🏞️ *JURASSIC PARK - COMUNICACIÓN INTERNA* 🏞️
+
+*DE: Administración del Parque*
+*PARA: Nuestros Valiosos Visitantes*
+
+*TEMA: Expansión de la Tienda de Regalos*
+
+Nos complace anunciar que nuestra Tienda de Regalos ha sido actualizada con 
+nuevas y emocionantes adiciones que capturan la esencia de Jurassic Park.
+
+*🛍️ NUEVAS ADQUISICIONES DISPONIBLES:*
+
+┌─ 🦖 COLECCIÓN CARNÍVOROS ────┐
+│ • T-Rex Emperor Edition      │
+│ • Raptor Squad Set           │
+│ • Spinosaurus Premium        │
+└─────────────────────────────┘
+
+┌─ 🦕 COLECCIÓN HERBÍVOROS ───┐
+│ • Brachiosaurus Family       │
+│ • Triceratops Trio           │
+│ • Stegosaurus Complete       │
+└─────────────────────────────┘
+
+┌─ 🎯 COLECCIÓN AVENTURA ─────┐
+│ • Explorer Kit Pro           │
+│ • Dino Tracker               │
+│ • Fossil Replica Set         │
+└─────────────────────────────┘
+
+*📞 RESERVA TU VISITA:* No esperes más para experimentar estas maravillas.
+
+*"Una experiencia que trascenderá el tiempo"*
+*El equipo de Jurassic Park*
+"""
+
+CUERPO_CORTO = """
+🦕 *¡NOTICIA PREHISTÓRICA!* 🦖
+
+*Nuevos habitantes han llegado a nuestra tienda:*
+
+• T-Rex Edition Especial
+• Dino Huevos Sorpresa  
+• Kit Paleontólogo Pro
+• Colección Completa Herbívoros
+
+*🏃‍♂️ ¡Ven antes de que desaparezcan!*
+
+*Jurassic Park Store - Donde la aventura nunca se extingue* 🌋
+"""
+
+cuerpos_email = [
+    CUERPO_EXPEDICION,
+    CUERPO_CIENTIFICO,
+    CUERPO_AVENTURA,
+    CUERPO_COMUNICACION,
+    CUERPO_CORTO
+]
 
 
-async def enviar_correos_publicidad(destinatarios: List[str], asunto: str, cuerpo: str):
-    html_content = f"""
-    <html>
-    <head>
-        <style>
-            .container {{ width: 90%; max-width: 600px; margin: 20px auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }}
-            .header {{ background-color: #c0392b; color: #ffffff; padding: 20px; text-align: center; }}
-            .content {{ padding: 30px; font-family: Arial, sans-serif; color: #333; }}
-            .footer {{ background-color: #333; color: #aaa; padding: 20px; text-align: center; font-size: 12px; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>{asunto}</h1>
-            </div>
-            <div class="content">
-                <p>{cuerpo}</p>
-                <br>
-                <p>Gracias por ser parte de la comunidad de Jurassic Park.</p>
-                <p><small>Si no deseas recibir más publicidad, puedes configurar tus preferencias en tu perfil.</small></p>
-            </div>
-            <div class="footer">
-                <p>&copy; 2024 InGen Corporation. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
+@router.get("/users/me", response_model=modelos.UsuarioAuth)
+async def read_users_me(current_user: modelos.UsuarioAuth = Depends(seguridad.obtener_usuario_actual)):
+    return current_user
 
-    for email_to in destinatarios:
-        message = MessageSchema(
-            subject=asunto,
-            recipients=[email_to],
-            body=html_content,
-            subtype=MessageType.html
+
+@router.get("/users/", response_model=List[UserReadSchema])
+async def read_users(
+        skip: int = 0,
+        limit: int = 100,
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    result = await db.execute(select(Usuario).offset(skip).limit(limit))
+    users = result.scalars().all()
+    return users
+
+
+@router.put("/users/{user_id}/grant-admin")
+async def grant_admin_privileges(
+        user_id: int,
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    result = await db.execute(select(Usuario).where(Usuario.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    user.role = "admin"
+    await db.commit()
+    return {"message": f"Usuario {user.username} ahora es administrador."}
+
+
+@router.put("/users/{user_id}/force-password-change")
+async def force_password_change(
+        user_id: int,
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    result = await db.execute(select(Usuario).where(Usuario.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    user.must_change_password = True
+    await db.commit()
+    return {"message": f"El usuario {user.username} deberá cambiar su contraseña en el próximo inicio de sesión."}
+
+
+@router.post("/enviar-publicidad")
+async def enviar_publicidad_a_todos(
+        background_tasks: BackgroundTasks,
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    query_last = select(HistorialEnviosPubli).order_by(HistorialEnviosPubli.timestamp.desc()).limit(1)
+    result_last = await db.execute(query_last)
+    last_log = result_last.scalars().first()
+
+    if last_log:
+        now = datetime.now(timezone.utc)
+        last_time = last_log.timestamp
+
+        if last_time.tzinfo is None:
+            last_time = last_time.replace(tzinfo=timezone.utc)
+
+        tiempo_transcurrido = now - last_time
+
+        if tiempo_transcurrido < timedelta(weeks=1):
+            tiempo_restante = timedelta(weeks=1) - tiempo_transcurrido
+            dias = tiempo_restante.days
+            horas = tiempo_restante.seconds // 3600
+            minutos = (tiempo_restante.seconds % 3600) // 60
+
+            raise HTTPException(
+                status_code=400,
+                detail=f"Solo se permite un envío semanal de marketing. Debes esperar {dias} días, {horas} horas y {minutos} minutos."
+            )
+
+    query = select(Usuario).where(Usuario.acepta_publicidad == True, Usuario.is_active == True)
+    result = await db.execute(query)
+    usuarios_con_publicidad = result.scalars().all()
+
+    destinatarios = [user.username for user in usuarios_con_publicidad]
+
+    if not destinatarios:
+        raise HTTPException(status_code=400, detail="No hay usuarios que acepten publicidad.")
+
+    cuerpo_elegido = random.choice(cuerpos_email)
+
+    background_tasks.add_task(
+        email_config.enviar_correos_publicidad,
+        destinatarios,
+        "¡Nuevas ofertas en Jurassic Park!",
+        cuerpo_elegido
+    )
+
+    try:
+        registro_auditoria = HistorialEnviosPubli(
+            admin_username=current_user.username,
+            destinatarios_count=len(destinatarios)
         )
+        db.add(registro_auditoria)
+        await db.commit()
+    except Exception as e:
+        logger.error(f"Error al guardar en auditoría: {e}")
+        await db.rollback()
 
-        try:
-            await fm.send_message(message)
-            print(f"Correo de publicidad enviado a {email_to}")
-        except Exception as e:
-            print(f"Error al enviar correo de publicidad a {email_to}: {e}")
+    return {"message": "Campaña de publicidad enviada en segundo plano.", "destinatarios_count": len(destinatarios)}
 
-def create_password_reset_email_template(reset_url: str, nombre_usuario: str) -> str:
-    """
-    Crea la plantilla de correo para el reseteo de contraseña.
-    """
-    html_content = f"""
-    <html>
-    <head>
-        <style>
-            body {{ font-family: 'Arial', sans-serif; line-height: 1.6; }}
-            .container {{ width: 90%; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
-            .header {{ font-size: 24px; color: #d9534f; }}
-            .content {{ margin-top: 20px; }}
-            .button {{
-                display: inline-block;
-                padding: 10px 20px;
-                margin: 20px 0;
-                background-color: #d9534f;
-                color: #ffffff;
-                text-decoration: none;
-                border-radius: 5px;
-                font-weight: bold;
-            }}
-            .footer {{ margin-top: 20px; font-size: 12px; color: #888; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">Solicitud de Reseteo de Contraseña</div>
-            <div class="content">
-                <p>Hola, {nombre_usuario},</p>
-                <p>Recibimos una solicitud para reestablecer la contraseña de tu cuenta en Jurassic Park.</p>
-                <p>Si no has sido tú, por favor ignora este correo.</p>
-                <p>Para reestablecer tu contraseña, haz clic en el siguiente botón:</p>
-                <a href="{reset_url}" class="button" style="color: #ffffff;">Reestablecer Contraseña</a>
-                <p>Este enlace expirará en 15 minutos.</p>
-                <p>Si tienes problemas con el botón, copia y pega la siguiente URL en tu navegador:</p>
-                <p><a href="{reset_url}">{reset_url}</a></p>
-            </div>
-            <div class="footer">
-                <p>&copy; Jurassic Park. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return html_content
+
+@router.get("/dinosaurios", response_model=List[modelos.DinosaurioSchema])
+async def admin_get_todos_los_dinosaurios(
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    result = await db.execute(select(DinosaurioTabla))
+    dinos = result.scalars().all()
+    return dinos
+
+
+@router.get("/recintos", response_model=List[modelos.RecintoSchema])
+async def admin_get_todos_los_recintos(
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    result = await db.execute(select(RecintoTabla))
+    recintos = result.scalars().all()
+    return recintos
+
+
+@router.put("/recintos/{recinto_id}/asignar_dino")
+async def asignar_dino_a_recinto(
+        recinto_id: int,
+        dino_id_str: str,
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    recinto_result = await db.execute(select(RecintoTabla).where(RecintoTabla.id == recinto_id))
+    recinto = recinto_result.scalars().first()
+    if not recinto:
+        raise HTTPException(status_code=404, detail="Recinto no encontrado")
+
+    dino_result = await db.execute(select(DinosaurioTabla).where(DinosaurioTabla.dino_id_str == dino_id_str))
+    dino = dino_result.scalars().first()
+    if not dino:
+        raise HTTPException(status_code=404, detail="Dinosaurio no encontrado")
+
+    recinto.dino_id_str = dino_id_str
+    await db.commit()
+
+    return {"message": f"Dinosaurio {dino.nombre} asignado a {recinto.nombre}"}
+
+
+@router.get("/logs/marketing", response_model=List[modelos.HistorialEnviosPubliSchema])
+async def get_marketing_logs(
+        db: AsyncSession = Depends(get_db_session),
+        current_user: modelos.UsuarioAuth = Depends(seguridad.get_current_active_admin)
+):
+    query = select(HistorialEnviosPubli).order_by(HistorialEnviosPubli.timestamp.desc()).limit(100)
+    result = await db.execute(query)
+    logs = result.scalars().all()
+    return logs

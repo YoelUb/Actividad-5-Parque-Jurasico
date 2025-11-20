@@ -16,7 +16,7 @@ const carnivoreOptions = [
 
 const herbivoreOptions = [
     {value: 'triceratops', label: 'Triceratops', previewPath: '/triceraptors/triceraptors1.png'},
-    {value: 'broncosaurio_azul', label: 'Brontosaurus (Azul)', previewPath: '/broncosaurio_azul/idle/broncosaurio1.png'}
+    {value: 'broncosaurio_azul', label: 'Brontosaurus (Azul)', previewPath: '/broncosaurio/idle/broncosaurio1.png'}
 ];
 
 const jeepOptions = [

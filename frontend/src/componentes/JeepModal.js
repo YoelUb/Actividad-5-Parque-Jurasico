@@ -1,54 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './JeepModal.css';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const FRAME_PATHS_IDLE = [
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_000.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_001.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_002.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_003.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_004.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_005.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_006.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_007.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_008.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_009.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_010.png',
-  '/Jeep/Jeep_Green/MOVE/SOUTH/SEPARATED/Green_JEEP_CLEAN_SOUTH_011.png',
-];
 
-const FRAME_PATHS_VIAJE = [
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_000.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_001.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_002.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_003.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_004.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_005.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_006.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_007.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_008.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_009.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_010.png',
-  '/Jeep/Jeep_Green/MOVE/EAST/SEPARATED/Green_JEEP_CLEAN_EAST_011.png',
-];
-
-const JeepModal = ({ isOpen, onClose, locations = [], onSelectLocation, phase }) => {
+const JeepModal = ({ isOpen, onClose, locations = [], onSelectLocation, phase, jeepColor = 'Green' }) => {
   const [frame, setFrame] = useState(0);
+
+  const { framesIdle, framesViaje } = useMemo(() => {
+    const color = jeepColor.charAt(0).toUpperCase() + jeepColor.slice(1);
+
+    const generateFrames = (direction) => {
+      const frames = [];
+      for (let i = 0; i <= 11; i++) {
+        const num = i.toString().padStart(3, '0');
+        frames.push(`/Jeep/Jeep_${color}/MOVE/${direction}/SEPARATED/${color}_JEEP_CLEAN_${direction}_${num}.png`);
+      }
+      return frames;
+    };
+
+    return {
+      framesIdle: generateFrames('SOUTH'),
+      framesViaje: generateFrames('EAST')
+    };
+  }, [jeepColor]);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const frameSet = phase === 'lista' ? FRAME_PATHS_IDLE : FRAME_PATHS_VIAJE;
+    const frameSet = phase === 'lista' ? framesIdle : framesViaje;
 
     const intervalId = setInterval(() => {
       setFrame(prevFrame => (prevFrame + 1) % frameSet.length);
     }, 100);
 
     return () => clearInterval(intervalId);
-  }, [isOpen, phase]);
+  }, [isOpen, phase, framesIdle, framesViaje]);
 
   const filteredLocations = locations.filter(loc => loc.name !== 'Coche');
-  const currentFrame = (phase === 'lista' ? FRAME_PATHS_IDLE : FRAME_PATHS_VIAJE)[frame];
+
+  const currentFrame = (phase === 'lista' ? framesIdle : framesViaje)[frame];
 
   const renderContent = () => {
     if (phase === 'viaje') {

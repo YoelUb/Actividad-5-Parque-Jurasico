@@ -24,7 +24,8 @@ const SpriteAnimator = ({
     animations,
     animationName,
     frameCount,
-    fps
+    fps,
+    startFrame: propStartFrame
 }) => {
     const [frameIndex, setFrameIndex] = useState(0);
 
@@ -35,14 +36,14 @@ const SpriteAnimator = ({
         [startFrame, endFrame] = animation;
         totalFrames = endFrame - startFrame + 1;
     } else {
-        startFrame = 1;
-        endFrame = frameCount || 1;
+        startFrame = propStartFrame || 1;
+        endFrame = frameCount ? startFrame + frameCount - 1 : 1;
         totalFrames = frameCount || 1;
     }
 
     useEffect(() => {
         setFrameIndex(0);
-    }, [animationName, totalFrames]);
+    }, [animationName, totalFrames, startFrame]);
 
     useInterval(() => {
         setFrameIndex((prevIndex) => (prevIndex + 1) % totalFrames);
@@ -63,7 +64,7 @@ const SpriteAnimator = ({
                 src={getFrameUrl(frameIndex)}
                 alt="sprite-anim"
                 className="sprite-image"
-                onError={(e) => e.target.style.display = 'none'} // Oculta si la imagen no carga
+                onError={(e) => e.target.style.display = 'none'}
             />
         </div>
     );
