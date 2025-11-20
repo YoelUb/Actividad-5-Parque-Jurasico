@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ...bd.BaseDatos import get_db_session
-from ...security import seguridad
-from ...modelos import dinosaurio as modelos
-from ...modelos.dinosaurio import Usuario, Dinosaurio as DinosaurioTabla, Recinto as RecintoTabla, HistorialEnviosPubli, \
+from src.parque_jurasico.bd.BaseDatos import get_db_session
+from src.parque_jurasico.security import seguridad
+from src.parque_jurasico.modelos import dinosaurio as modelos
+from src.parque_jurasico.modelos.dinosaurio import Usuario, Dinosaurio as DinosaurioTabla, Recinto as RecintoTabla, HistorialEnviosPubli, \
     UserReadSchema, HistorialEnviosPubliSchema
-from ...core import email_config
+from src.parque_jurasico.core import email_config
 import logging
 from datetime import datetime, timedelta, timezone
 import random
