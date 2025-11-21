@@ -2,7 +2,7 @@ import React, {useRef, useState, useEffect} from 'react';
 import {Stage, Layer, Image, Circle, Label, Tag, Text} from 'react-konva';
 import useImage from 'use-image';
 
-import { LOCATIONS } from './config/locations';
+import { Locations } from './config/locations';
 import { JEEP_OPTIONS } from './config/JeepOptions';
 
 const ORIGINAL_WIDTH = 1152;
@@ -164,7 +164,7 @@ const MapaJurassic = ({
                 <Layer>
                     <MapaImage width={size.width} height={size.height}/>
 
-                    {LOCATIONS.map((loc) => (
+                    {Locations.map((loc) => (
                         <React.Fragment key={loc.name}>
                             <MapPoint
                                 point={loc}

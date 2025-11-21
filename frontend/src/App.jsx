@@ -16,7 +16,7 @@ import SolicitarReset from './componentes/RequestPasswordReset';
 import EjecutarReset from './componentes/ResetPassword';
 import './App.css';
 
-import {LOCATIONS} from './componentes/config/locations';
+import {Locations} from './componentes/config/locations';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -297,7 +297,7 @@ function Aplicacion() {
                 isOpen={jeepModalAbierto}
                 onClose={handleCloseJeepModal}
                 phase={jeepModalPhase}
-                locations={LOCATIONS}
+                locations={Locations}
                 onSelectLocation={handleJeepRedirect}
                 jeepColor={assetConfig?.jeepColor || 'Green'}
             />

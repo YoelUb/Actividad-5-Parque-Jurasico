@@ -1,4 +1,4 @@
-export const LOCATIONS = [
+export const Locations = [
     {"name": "Recinto Carnívoros", "x": 236, "y": 290, "r": 8, "dinoId": "dino_001"},
     {"name": "Recinto Herbívoros", "x": 334, "y": 374, "r": 8, "dinoId": "dino_004"},
     {"name": "Recinto Aviario", "x": 500, "y": 438, "r": 8, "dinoId": "dino_003"},

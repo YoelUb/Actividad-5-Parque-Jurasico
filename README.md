@@ -126,6 +126,19 @@ Para ejecutar los tests del backend:
 
 ---
 
+## Frontend (React)
+
+Las pruebas del frontend utilizan **Vitest** y **React Testing Library**.
+
+**Asegurate de tener la aplicación levantada con Docker Compose, y así correr los tests dentro del contenedor**
+
+
+```bash
+   docker-compose exec frontend npm run test
+```
+
+---
+
 **¡Disfruta construyendo tu propio Parque Jurásico! 🦕**
 
 ---
