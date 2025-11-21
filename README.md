@@ -116,16 +116,9 @@ Abre tu navegador y navega a http://localhost:3000.
 
 Para ejecutar los tests del backend:
 
-**Asegúrate de tener el entorno virtual activado e instalar las dependencias de requirements.txt.**
+**Asegúrate de tener Docker, puedes ejecutar docker-compose exec app pytest.**
 
-- Ejecuta pytest:
-
-```bash
-   pytest
-```
-
-Nota: Si usas **Docker**, puedes ejecutar docker-compose exec app pytest.
-
+ **Docker**, puedes ejecutar docker-compose exec app pytest.
 
 ```bash
    docker-compose exec app pytest

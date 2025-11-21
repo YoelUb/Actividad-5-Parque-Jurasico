@@ -81,8 +81,9 @@ async def enviar_publicidad_a_todos(
     background_tasks.add_task(
         email_config.enviar_correos_publicidad,
         destinatarios,
-        "¡Nuevas ofertas en Jurassic Park!",
-        "Visita nuestra tienda de regalos, ¡tenemos nuevos peluches de T-Rex!"
+        "🦖 ¡Nuevas Ofertas en Jurassic Park!",
+        email_config.create_promotional_email_template()
+
     )
 
     try:
