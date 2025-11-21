@@ -7,18 +7,18 @@ ENDPOINT_RECINTOS = "/api/parque/recintos"
 
 
 @pytest.mark.asyncio
-async def test_obtener_dinosaurios_lista_vacia(client):
+async def test_obtener_dinosaurios_lista_vacia(client, auth_headers):
     """
     Verifica que el endpoint devuelve una lista vacía ([])
     cuando la base de datos no tiene registros.
     """
-    response = await client.get(ENDPOINT_DINOS)
+    response = await client.get(ENDPOINT_DINOS, headers=auth_headers)
     assert response.status_code == 200
     assert response.json() == []
 
 
 @pytest.mark.asyncio
-async def test_obtener_dinosaurios_con_datos(client, db_session):
+async def test_obtener_dinosaurios_con_datos(client, db_session, auth_headers):
     """
     Verifica que el endpoint devuelve correctamente los dinosaurios
     que existen en la base de datos, aplicando la configuración de assets.
@@ -34,7 +34,7 @@ async def test_obtener_dinosaurios_con_datos(client, db_session):
     db_session.add(dino)
     await db_session.commit()
 
-    response = await client.get(ENDPOINT_DINOS)
+    response = await client.get(ENDPOINT_DINOS, headers=auth_headers)
 
     assert response.status_code == 200
     data = response.json()
@@ -44,7 +44,7 @@ async def test_obtener_dinosaurios_con_datos(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_obtener_detalle_dinosaurio_exito(client, db_session):
+async def test_obtener_detalle_dinosaurio_exito(client, db_session, auth_headers):
     """
     Prueba obtener un dinosaurio específico por su ID string.
     """
@@ -59,7 +59,7 @@ async def test_obtener_detalle_dinosaurio_exito(client, db_session):
     db_session.add(dino)
     await db_session.commit()
 
-    response = await client.get(f"{ENDPOINT_DINO_DETALLE}/dino_unico")
+    response = await client.get(f"{ENDPOINT_DINO_DETALLE}/dino_unico", headers=auth_headers)
 
     assert response.status_code == 200
     data = response.json()
@@ -68,17 +68,17 @@ async def test_obtener_detalle_dinosaurio_exito(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_obtener_detalle_dinosaurio_404(client):
+async def test_obtener_detalle_dinosaurio_404(client, auth_headers):
     """
     Prueba que la API devuelve un error 404 si el dinosaurio no existe.
     """
-    response = await client.get(f"{ENDPOINT_DINO_DETALLE}/id_que_no_existe")
+    response = await client.get(f"{ENDPOINT_DINO_DETALLE}/id_que_no_existe", headers=auth_headers)
     assert response.status_code == 404
     assert response.json()["detail"] == "Dinosaurio no encontrado"
 
 
 @pytest.mark.asyncio
-async def test_obtener_recintos(client, db_session):
+async def test_obtener_recintos(client, db_session, auth_headers):
     """
     Verifica que se pueden obtener los recintos del parque.
     """
@@ -92,7 +92,7 @@ async def test_obtener_recintos(client, db_session):
     db_session.add(recinto)
     await db_session.commit()
 
-    response = await client.get(ENDPOINT_RECINTOS)
+    response = await client.get(ENDPOINT_RECINTOS, headers=auth_headers)
 
     assert response.status_code == 200
     data = response.json()
