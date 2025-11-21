@@ -15,7 +15,7 @@ async def test_login_exitoso(client, db_session):
     hashed = hashear_contrasena(password_plana)
 
     usuario = Usuario(
-        username="tests@parque.com",
+        username="test@parque.com",
         nombre="Tester",
         apellidos="Jurasico",
         hashed_password=hashed,
@@ -26,7 +26,7 @@ async def test_login_exitoso(client, db_session):
     await db_session.commit()
 
     payload = {
-        "username": "tests@parque.com",
+        "username": "test@parque.com",
         "password": password_plana
     }
 
@@ -46,7 +46,7 @@ async def test_login_credenciales_incorrectas(client, db_session):
     """
     # Crear usuario
     usuario = Usuario(
-        username="tests@parque.com",
+        username="test@parque.com",
         nombre="Tester",
         apellidos="Jurasico",
         hashed_password=hashear_contrasena("Correcta123!"),
@@ -56,7 +56,7 @@ async def test_login_credenciales_incorrectas(client, db_session):
     await db_session.commit()
 
     payload = {
-        "username": "tests@parque.com",
+        "username": "test@parque.com",
         "password": "IncorrectaPassword"
     }
 

@@ -24,7 +24,7 @@ async def test_obtener_dinosaurios_con_datos(client, db_session, auth_headers):
         especie="Tyrannosaurus",
         dieta="Carnívoro",
         descripcion="Dino de prueba unitaria",
-        sprite_base_path="/tests/path"
+        sprite_base_path="/test/path"
     )
     db_session.add(dino_prueba)
     await db_session.commit()

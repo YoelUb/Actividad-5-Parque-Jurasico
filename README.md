@@ -1,4 +1,4 @@
-# ACTVIDAD-5-PARQUE-JURÁSICO  
+# ACTIVIDAD-5-PARQUE-JURÁSICO  
 
 **Desata la aventura, enciende la imaginación, construye el futuro**
 
@@ -22,7 +22,7 @@
 - [Requisitos Previos](#requisitos-previos)  
 - [Instalación](#instalación)  
 - [Uso](#uso)  
-- [Pruebas](#pruebas)  
+- [Pruebas](#pruebas) 
 
 ---
 
