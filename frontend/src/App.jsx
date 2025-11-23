@@ -15,11 +15,8 @@ import IntroAnimacion from './componentes/IntroAnimacion';
 import SolicitarReset from './componentes/RequestPasswordReset';
 import EjecutarReset from './componentes/ResetPassword';
 import './App.css';
-
 import {Locations} from './componentes/config/locations';
-
 const API_URL = 'http://localhost:8000/api';
-
 function Aplicacion() {
     const [token, setToken] = useState(localStorage.getItem('jurassic_token'));
     const [usuarioActual, setUsuarioActual] = useState(null);
@@ -33,25 +30,20 @@ function Aplicacion() {
     const [jeepModalAbierto, setJeepModalAbierto] = useState(false);
     const [jeepModalPhase, setJeepModalPhase] = useState('lista');
     const [guardasModalAbierto, setGuardasModalAbierto] = useState(false);
-
     const [mostrandoIntro, setMostrandoIntro] = useState(() => {
         return sessionStorage.getItem('haVistoIntro') === null;
     });
-
     const helicopterAudioRef = useRef(null);
     const jeepAudioRef = useRef(null);
     const navigate = useNavigate();
-
     useEffect(() => {
         helicopterAudioRef.current = new Audio('/helicoptero.mp3');
         helicopterAudioRef.current.preload = 'auto';
         helicopterAudioRef.current.loop = true;
-
         jeepAudioRef.current = new Audio('/jeep.mp3');
         jeepAudioRef.current.preload = 'auto';
         jeepAudioRef.current.loop = true;
     }, []);
-
     const manejarCierreSesion = useCallback(() => {
         setToken(null);
         setUsuarioActual(null);
@@ -64,27 +56,22 @@ function Aplicacion() {
         setGuardasModalAbierto(false);
         navigate('/login');
     }, [navigate]);
-
     const iniciarCierreSesion = () => {
         setModalAbierto(true);
     };
-
     const obtenerDatosIniciales = useCallback(async () => {
         if (!token) {
             setCargando(false);
             return;
         }
-
         try {
             setCargando(true);
-
             const userRes = await fetch(`${API_URL}/auth/me`, {
                 headers: {Authorization: `Bearer ${token}`},
             });
             if (!userRes.ok) throw new Error('Token inválido');
             const datosUsuario = await userRes.json();
             setUsuarioActual(datosUsuario);
-
             const assetsRes = await fetch(`${API_URL}/assets/config`, {
                 headers: {Authorization: `Bearer ${token}`},
             });
@@ -92,7 +79,6 @@ function Aplicacion() {
                 const configData = await assetsRes.json();
                 setAssetConfig(configData);
             }
-
             const dinosRes = await fetch(`${API_URL}/parque/dinosaurios`, {
                 headers: {Authorization: `Bearer ${token}`},
             });
@@ -100,7 +86,6 @@ function Aplicacion() {
                 const allDinos = await dinosRes.json();
                 setDinos(allDinos);
             }
-
         } catch (err) {
             console.error('Error cargando datos:', err);
             setToken(null);
@@ -110,16 +95,13 @@ function Aplicacion() {
             setCargando(false);
         }
     }, [token, navigate]);
-
     useEffect(() => {
         obtenerDatosIniciales();
     }, [token, obtenerDatosIniciales]);
-
     const manejarLoginExitoso = (nuevoToken) => {
         setToken(nuevoToken);
         localStorage.setItem('jurassic_token', nuevoToken);
     };
-
     const handleDinoSelect = (dinoId) => {
         if (dinoId && dinos.length > 0) {
             const dino = dinos.find(d => d.dino_id_str === dinoId);
@@ -128,44 +110,34 @@ function Aplicacion() {
             }
         }
     };
-
     const handleCloseDinoModal = () => {
         setDinoSeleccionado(null);
     };
-
     const handleHelipuertoClick = () => {
         helicopterAudioRef.current.currentTime = 0;
         helicopterAudioRef.current.play().catch(e => console.error("Audio play failed:", e));
-
         setLabModalPhase('helicopter');
         setLabModalAbierto(true);
-
         setTimeout(() => {
             setLabModalPhase('lab');
             helicopterAudioRef.current.pause();
         }, 4000);
     };
-
     const handleCloseLabModal = () => {
         helicopterAudioRef.current.pause();
         setLabModalAbierto(false);
     };
-
     const handleCocheClick = () => {
         setJeepModalPhase('lista');
         setJeepModalAbierto(true);
     };
-
     const handleJeepRedirect = (location) => {
         jeepAudioRef.current.currentTime = 0;
         jeepAudioRef.current.play().catch(e => console.error("Audio play failed:", e));
-
         setJeepModalPhase('viaje');
-
         setTimeout(() => {
             jeepAudioRef.current.pause();
             setJeepModalAbierto(false);
-
             if (location.dinoId) {
                 handleDinoSelect(location.dinoId);
             } else if (location.name === 'Helipuerto') {
@@ -177,105 +149,101 @@ function Aplicacion() {
             }
         }, 4000);
     };
-
     const handleCloseJeepModal = () => {
         jeepAudioRef.current.pause();
         setJeepModalAbierto(false);
     };
-
     const handleGuardasClick = () => {
         setGuardasModalAbierto(true);
     };
-
     const handleCloseGuardasModal = () => {
         setGuardasModalAbierto(false);
     };
-
     const handleIntroTerminada = () => {
         setMostrandoIntro(false);
         sessionStorage.setItem('haVistoIntro', 'true');
+    };
+
+    const getHomePath = () => {
+        if (!token) return '/login';
+        if (usuarioActual?.role === 'admin') return '/admin';
+        return '/mapa';
+    };
+
+    const PublicRoute = ({ children }) => {
+        return !token ? children : <Navigate to={getHomePath()} replace />;
+    };
+
+    const ProtectedRoute = ({ children, requireAdmin = false }) => {
+        if (!token) return <Navigate to="/login" replace />;
+
+        const isAdmin = usuarioActual?.role === 'admin';
+        const hasCorrectRole = requireAdmin ? isAdmin : !isAdmin;
+
+        if (!hasCorrectRole) {
+            return <Navigate to={requireAdmin ? '/mapa' : '/admin'} replace />;
+        }
+
+        return children;
     };
 
     const renderizarContenido = () => {
         if (cargando) {
             return <h1>Cargando...</h1>;
         }
-
         if (mostrandoIntro) {
             return <IntroAnimacion onEmpezar={handleIntroTerminada}/>;
         }
 
-        const homePath = token ? (usuarioActual?.role === 'admin' ? '/admin' : '/mapa') : '/login';
-
         return (
             <Routes>
                 <Route path="/login" element={
-                    !token ? (
+                    <PublicRoute>
                         <Autenticacion enLoginExitoso={manejarLoginExitoso}/>
-                    ) : (
-                        <Navigate to={homePath} replace/>
-                    )
+                    </PublicRoute>
                 }/>
-
                 <Route path="/registro" element={
-                    !token ? <Registro/> : <Navigate to={homePath} replace/>
+                    <PublicRoute><Registro/></PublicRoute>
                 }/>
-
                 <Route path="/verificar-email" element={
-                    !token ? <VerificarEmail/> : <Navigate to={homePath} replace/>
+                    <PublicRoute><VerificarEmail/></PublicRoute>
                 }/>
-
                 <Route path="/force-change-password" element={
-                    !token ? <ForceChangePassword/> : <Navigate to={homePath} replace/>
+                    <PublicRoute><ForceChangePassword/></PublicRoute>
                 }/>
-
                 <Route path="/solicitar-reset" element={
-                    !token ? <SolicitarReset/> : <Navigate to={homePath} replace/>
+                    <PublicRoute><SolicitarReset/></PublicRoute>
                 }/>
-
                 <Route path="/reset-password" element={
-                    !token ? <EjecutarReset/> : <Navigate to={homePath} replace/>
+                    <PublicRoute><EjecutarReset/></PublicRoute>
                 }/>
-
                 <Route path="/admin" element={
-                    token && usuarioActual?.role === 'admin' ? (
+                    <ProtectedRoute requireAdmin={true}>
                         <AdminDashboard onSalirClick={iniciarCierreSesion}/>
-                    ) : (
-                        <Navigate to={token ? homePath : "/login"} replace/>
-                    )
+                    </ProtectedRoute>
                 }/>
-
                 <Route path="/mapa" element={
-                    token ? (
-                        usuarioActual?.role !== 'admin' ? (
-                            <MapaJurassic
-                                onSalirClick={iniciarCierreSesion}
-                                onDinoSelect={handleDinoSelect}
-                                onHelipuertoClick={handleHelipuertoClick}
-                                onCocheClick={handleCocheClick}
-                                onGuardasClick={handleGuardasClick}
-                                assetConfig={assetConfig}
-                                dinos={dinos}
-                            />
-                        ) : (
-                            <Navigate to="/admin" replace/>
-                        )
-                    ) : (
-                        <Navigate to="/login" replace/>
-                    )
+                    <ProtectedRoute requireAdmin={false}>
+                        <MapaJurassic
+                            onSalirClick={iniciarCierreSesion}
+                            onDinoSelect={handleDinoSelect}
+                            onHelipuertoClick={handleHelipuertoClick}
+                            onCocheClick={handleCocheClick}
+                            onGuardasClick={handleGuardasClick}
+                            assetConfig={assetConfig}
+                            dinos={dinos}
+                        />
+                    </ProtectedRoute>
                 }/>
-
                 <Route path="*" element={
-                    <Navigate to={homePath} replace/>
+                    <Navigate to={getHomePath()} replace/>
                 }/>
             </Routes>
         );
     };
-
     return (
         <div className="App">
             <header className="App-header">{renderizarContenido()}</header>
-
             <ModalConfirmacion
                 isOpen={modalAbierto}
                 onClose={() => setModalAbierto(false)}
@@ -284,15 +252,12 @@ function Aplicacion() {
                 confirmText="Sí, abandonar"
                 cancelText="Quedarse"
             />
-
             <DinoModal dino={dinoSeleccionado} onClose={handleCloseDinoModal}/>
-
             <LabModal
                 isOpen={labModalAbierto}
                 phase={labModalPhase}
                 onClose={handleCloseLabModal}
             />
-
             <JeepModal
                 isOpen={jeepModalAbierto}
                 onClose={handleCloseJeepModal}
@@ -301,7 +266,6 @@ function Aplicacion() {
                 onSelectLocation={handleJeepRedirect}
                 jeepColor={assetConfig?.jeepColor || 'Green'}
             />
-
             <GuardasModal
                 isOpen={guardasModalAbierto}
                 onClose={handleCloseGuardasModal}
@@ -309,5 +273,4 @@ function Aplicacion() {
         </div>
     );
 }
-
 export default Aplicacion;
