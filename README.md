@@ -17,48 +17,49 @@
 ---
 
 ## 📚 Tabla de Contenidos
-- [Descripción General](#descripción-general)  
-- [Primeros Pasos](#primeros-pasos)  
-- [Requisitos Previos](#requisitos-previos)  
-- [Instalación](#instalación)  
-- [Uso](#uso)  
-- [Pruebas](#pruebas) 
+- [Descripción General](#descripción-general)
+- [Primeros Pasos](#primeros-pasos)
+- [Requisitos Previos](#requisitos-previos)
+- [Instalación](#instalación)
+- [Uso](#uso)
+- [Pruebas](#pruebas)
+- [Contacto](#contacto)
 
 ---
 
-## 🦖 Descripción General
+## Descripción General
 **Actividad-5-Parque-Jurásico** es un conjunto de herramientas full-stack diseñado para facilitar la creación de aplicaciones inmersivas y escalables con temática de **Parque Jurásico**.  
 Combina despliegue con contenedores, arquitectura API modular y componentes frontend avanzados para optimizar el desarrollo y asegurar la mantenibilidad.
 
-### ⭐ ¿Por qué Actividad-5-Parque-Jurásico?
+### ¿Por qué Actividad-5-Parque-Jurásico?
 
 Este proyecto busca simplificar la creación de sistemas complejos de gestión de parques con enfoque en **seguridad**, **escalabilidad** y **engagement del usuario**.
 
 Características principales:
 
-- 🐳 **Contenerización:**  
+-  **Contenerización:**  
   Uso de Docker y docker-compose para entornos consistentes y aislados tanto en desarrollo como en producción.
 
-- 🔐 **Seguridad y Auditoría:**  
+- **Seguridad y auditoría:**  
   Autenticación robusta, gestión de roles y registro detallado de actividades.
 
-- 🎨 **Gestión Dinámica de Recursos:**  
+- **Gestión dinámica de recursos:**  
   Permite personalizar activos visuales y contenido, facilitando temas y actualizaciones dinámicas.
 
-- 🚀 **API Modular:**  
+- **API Modular:**  
   Endpoints organizados para activos, datos del parque y controles administrativos, ideal para un backend escalable.
 
-- 🖥️ **Frontend Rico en Componentes:**  
+- **Frontend:**  
   Mapas interactivos, animaciones y una interfaz intuitiva construida con React.
 
-- ⚙️ **Pruebas y Monitoreo:**  
+- **Pruebas y monitoreo:**  
   Configuraciones de testing y métricas de rendimiento para garantizar aplicaciones de alta calidad.
 
 ---
 
-## 🚀 Primeros Pasos
+## Primeros Pasos
 
-### ✅ Requisitos Previos
+### Requisitos Previos
 Antes de ejecutar el proyecto, asegúrate de contar con:
 
 - Lenguaje de programación: **JavaScript**  
@@ -67,7 +68,7 @@ Antes de ejecutar el proyecto, asegúrate de contar con:
 
 ---
 
-## 🔧 Instalación
+## Instalación
 
 Construye **Actividad-5-Parque-Jurásico** desde el código fuente e instala las dependencias:
 
@@ -85,7 +86,7 @@ Construye **Actividad-5-Parque-Jurásico** desde el código fuente e instala las
 
 - Crea un archivo **".env"** en la raíz basado en **"env.example"**.
 
-## ▶️ Uso
+## Uso
 
 La forma más sencilla de ejecutar la aplicación completa es utilizando Docker Compose.
 
@@ -110,7 +111,7 @@ Esto iniciará:
 Abre tu navegador y navega a http://localhost:3000.
 
 
-# 🧪 Pruebas
+# Pruebas
 
 ## Backend (Python)
 
